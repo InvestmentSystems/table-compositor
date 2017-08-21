@@ -13,6 +13,7 @@
 # serve to show the default.
 
 import sys, os
+import subprocess
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -247,3 +248,19 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+# https://github.com/rtfd/readthedocs.org/issues/1139
+def run_apidoc(_):
+    from sphinx.apidoc import main
+    import os
+    import sys
+    cur_dir = os.path.abspath(os.path.dirname(__file__))
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+    import pdb;pdb.set_trace()
+    print(sys.path)
+    module = os.path.join(cur_dir,"..", "..", 'table_compositor')
+    print(module)
+    main(['-e', '-o', cur_dir, module, '--force'])
+
+def setup(app):
+    app.connect('builder-inited', run_apidoc)
