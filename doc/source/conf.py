@@ -256,10 +256,7 @@ def run_apidoc(_):
     import sys
     cur_dir = os.path.abspath(os.path.dirname(__file__))
     sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
-    import pdb;pdb.set_trace()
-    print(sys.path)
     module = os.path.join(cur_dir,"..", "..", 'table_compositor')
-    print(module)
     main(['-e', '-o', cur_dir, module, '--force'])
 
 def setup(app):
