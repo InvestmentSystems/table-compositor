@@ -250,14 +250,14 @@ texinfo_documents = [
 #texinfo_no_detailmenu = False
 
 # https://github.com/rtfd/readthedocs.org/issues/1139
-def run_apidoc(_):
-    from sphinx.apidoc import main
-    import os
-    import sys
-    cur_dir = os.path.abspath(os.path.dirname(__file__))
-    sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
-    module = os.path.join(cur_dir,"..", "..", 'table_compositor')
-    main(['-e', '-o', cur_dir, module, '--force'])
+# def run_apidoc(_):
+#     from sphinx.apidoc import main
+#     import os
+#     import sys
+#     cur_dir = os.path.abspath(os.path.dirname(__file__))
+#     sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+#     module = os.path.join(cur_dir,"..", "..", 'table_compositor')
+#     main(['-e', '-o', cur_dir, module, '--force'])
 
-def setup(app):
-    app.connect('builder-inited', run_apidoc)
+# def setup(app):
+#     app.connect('builder-inited', run_apidoc)
