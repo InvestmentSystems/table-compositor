@@ -9,6 +9,8 @@ from os import path
 # rm -r dist
 # python setup.py sdist
 # python setup.py bdist_wheel
+# twine register dist/<wheel file>
+# twine register dist/<tar file>
 # twine upload dist/*
 
 here = path.abspath(path.dirname(__file__))
@@ -17,9 +19,9 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='table-compositor',
-    version='1.0.0',
+    version='1.0.1',
 
-    description='Library to render table-like data structure into xlsx and other formats.',
+    description='Library to render table-like data structure into XLSX and other formats.',
     long_description=long_description,
 
     install_requires=['pandas', 'openpyxl'],

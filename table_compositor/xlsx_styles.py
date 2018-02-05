@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from openpyxl.styles import Side
 from openpyxl.styles import Color
 from openpyxl.styles import Border
@@ -8,7 +10,13 @@ from openpyxl.styles import Font
 
 class OpenPyxlStyleHelper:
 
+    # good reference:
+    # https://www.ozgrid.com/Excel/excel-custom-number-formats.htm
     DOLLAR_FORMAT = '_($* #,##0_);_($* (#,##0);_($* "-"??_);_(@_)'
+    CENTS_FORMAT = '_($* #,##0.00_);_($* (#,##0.00);_($* "-"??_);_(@_)'
+
+    # without dollar sign, but has same rendering format for currency
+    GENERAL_CURRENCY_FORMAT = '_(* #,##0.00_);_(* (#,##0.00);_(* "-"??_);_(@_)'
     PERCENT_FORMAT = '0.00%'
 
     class CustomBorders:
@@ -16,6 +24,7 @@ class OpenPyxlStyleHelper:
         thick_white = Side(border_style='thick', color='FFFFFF')
 
         thin_black = Side(border_style='thin', color='000000')
+        thick_black = Side(border_style='thick', color='000000')
 
         border = Border(left=thin_white, right=thin_white,
                 top=thin_white, bottom=thin_white)
@@ -53,7 +62,9 @@ class OpenPyxlStyleHelper:
             left=thick_white, right=thick_white,
             top=thin_white, bottom=thin_white)
 
+
     @staticmethod
+    @lru_cache(maxsize=None)
     def default_header_style(
             *,
             alignment='center',
@@ -71,11 +82,11 @@ class OpenPyxlStyleHelper:
             border: an openpyxl.Border instance, defaults to thin white border
 
         Returns:
-              A dict of key-values pairs, where each key is a attr of the `cell` object in openyxl and value is valid value of that attr.
+            A dict of key-values pairs, where each key is a attr of the `cell` object in openyxl and value is valid value of that attr.
         '''
 
         if not border:
-            border = OpenPyxlStyleHelper.CustomBorders.thin_black_border
+            border = OpenPyxlStyleHelper.CustomBorders.thin_white_border
 
         return dict(
             alignment=Alignment(horizontal=alignment),
@@ -85,6 +96,7 @@ class OpenPyxlStyleHelper:
 
 
     @staticmethod
+    @lru_cache(maxsize=None)
     def get_style(
             number_format='General',
             bg_color=None,
@@ -99,7 +111,7 @@ class OpenPyxlStyleHelper:
             border: an openpyxl.Border instance, defaults to thin white border
 
         Returns:
-              A dict of key-values pairs, where each key is a attr of the `cell` object in openyxl and value is valid value of that attr.
+            A dict of key-values pairs, where each key is a attr of the `cell` object in openyxl and value is valid value of that attr.
         '''
         pattern_fill = PatternFill()
         if bg_color:

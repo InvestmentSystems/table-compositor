@@ -11,7 +11,7 @@ class HTMLWriter:
         _attrs = ' '.join("{}='{}'".format(k, v) for k, v in sorted(attrs.items()))
         _attrs = _attrs.strip(" ")
         _attrs = ' ' + _attrs if _attrs else ''
-        s = '<{elem}{elem_attr}>{v}</{elem}>'.format(
+        s = '<{elem}{elem_attr}>{v}</{elem}>\n'.format(
             elem=element, elem_attr=_attrs, v=value)
         return s
 
@@ -34,7 +34,7 @@ class HTMLWriter:
     def _to_html(row_col_dict, **kwargs):
         '''
         Args:
-        row_col_dict: dict with (0, 0, 0, 0) : (Value, Style)
+            row_col_dict: dict with (0, 0, 0, 0) : (Value, Style)
         '''
         def wrap_tr(offsets):
             s = []

@@ -10,14 +10,13 @@ and also create Excel files with all fancy formatting.
 # e. Revisit _convert method
 
 
-from itertools import groupby
-from itertools import product
-from collections import deque
 from collections import defaultdict
+from collections import deque
 from collections import namedtuple
+from itertools import groupby
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 StyleWrapper = namedtuple('StyleWrapper', ['user_style'])
 
@@ -99,12 +98,14 @@ def to_row_col_dict(presentation_and_loc, row_col_dict=None, nesting_level=0, ne
             for offsets, value, style in data}
         row_col_dict.update(data)
 
-
-    for i in presentation_model.data.values.index:
-        for c in presentation_model.data.values.columns:
-            offsets = data_locs.loc[i, c]
+    data_locs_array = data_locs.values
+    pm_data_value_array = presentation_model.data.values.values
+    pm_data_style_array = presentation_model.data.style.values
+    for ix, _ in enumerate(presentation_model.data.values.index):
+        for j, _ in enumerate(presentation_model.data.values.columns):
+            offsets = data_locs_array[ix, j]
             if isinstance(offsets, PresentationAndLoc):
-                inner_view_and_locs = data_locs.loc[i, c]
+                inner_view_and_locs = data_locs_array[ix, j]
                 if nested:
                     row_col_dict[offsets] = (
                         to_row_col_dict(
@@ -119,8 +120,8 @@ def to_row_col_dict(presentation_and_loc, row_col_dict=None, nesting_level=0, ne
                             nesting_level, nested))
             else:
                 loc_offsets = LocOffsets(*offsets)
-                value = presentation_model.data.values.loc[i, c]
-                style = presentation_model.data.style.loc[i, c]
+                value = pm_data_value_array[ix, j]
+                style = pm_data_style_array[ix, j]
                 row_col_dict[loc_offsets] = ValueAndStyleAttributes(
                     value, style, nesting_level)
 
@@ -134,8 +135,12 @@ class PresentationLayoutManager:
     @staticmethod
     def apply(f, df):
         df = pd.DataFrame(index=df.index, columns=df.columns)
-        for i, c in product(df.index.values, df.columns.values):
-            df.loc[i, c] = f(i, c)
+        index_length = len(df.index)
+        for c in df.columns.values:
+            a = np.empty(index_length, dtype=object)
+            for ix, i in enumerate(df.index.values):
+                a[ix] = f(i, c)
+            df.loc[:, c] = a
         return df
 
     @staticmethod
@@ -190,27 +195,34 @@ class PresentationLayoutManager:
 
         start_row, start_col, end_row, end_col = df_offsets
         df = pd.DataFrame(index=df_view.index, columns=df_view.columns)
-
-        for i in df.index.values:
+        df_view_array = df_view.values
+        all_offsets = np.empty(
+                [len(df.index.values), len(df.columns.values)],
+                dtype=object)
+        for ix, i in enumerate(df.index.values):
             end_col, start_col = df_offsets[1], df_offsets[1]
-            for c in df.columns.values:
+            for j, c in enumerate(df.columns.values):
                 end_row = start_row + row_hts[i] - 1
                 end_col = start_col + col_widths[c] - 1
-                df.loc[i, c] = (start_row, start_col, end_row, end_col)
-                if isinstance(df_view.loc[i, c], PresentationModel):
+                all_offsets[ix, j] = (start_row, start_col, end_row, end_col)
+                if isinstance(df_view_array[ix, j], PresentationModel):
                     inner_df = PresentationLayoutManager.resolve_loc(
-                        df_view.loc[i, c],
+                        df_view_array[ix, j],
                         (start_row, start_col, start_row, start_col),
                         nesting_level + 1)
-                    df.loc[i, c] = inner_df
+                    all_offsets[ix, j] = inner_df
+                    #assert all_offsets[ix, j] == inner_df
                 start_col = end_col + 1
             start_row = end_row + 1
+        df.loc[:, df.columns.values] = all_offsets
+
         locs = Locs(
             header_loc=header_loc,
             index_loc=index_loc,
             data_loc=df,
             index_name_loc=index_name_loc,
             nesting_level=nesting_level)
+        #print('Returning presenation and loc')
         return PresentationAndLoc(model=presentation_model, locs=locs)
 
     @staticmethod
@@ -236,21 +248,34 @@ class PresentationLayoutManager:
                 for i, x in enumerate(presentation_and_loc.locs.index_name_loc))
 
         data_loc = presentation_and_loc.locs.data_loc
+        data_loc_array = data_loc.values
         df = pd.DataFrame(index=data_loc.index, columns=data_loc.columns)
-        for i in df.index.values:
-            for c in df.columns.values:
-                # FIXME: instance(xx, PresentationAndLoc) is not working right now
-                if hasattr(data_loc.loc[i, c], 'locs'):
-                    inner_view_and_loc = data_loc.loc[i, c]
-                    df.loc[i, c] = PresentationLayoutManager.shift_loc(
-                        inner_view_and_loc,
-                        rows, cols)
-                else:
-                    df.loc[i, c] = (data_loc.loc[i, c][0] + rows,
-                                    data_loc.loc[i, c][1] + cols,
-                                    data_loc.loc[i, c][2] + rows,
-                                    data_loc.loc[i, c][3] + cols)
-
+        new_locs = np.empty(
+                [len(df.index), len(df.columns)],
+                dtype=object)
+        for ix, _ in enumerate(df.index.values):
+            for j, _ in enumerate(df.columns.values):
+                try:
+                    # usually we are only dealing with non-nested
+                    # data frames, If we fail due to Type
+                    # error it is mostly due to nested data frames
+                    new_locs[ix, j] = (
+                            data_loc_array[ix, j][0] + rows,
+                            data_loc_array[ix, j][1] + cols,
+                            data_loc_array[ix, j][2] + rows,
+                            data_loc_array[ix, j][3] + cols)
+                except TypeError:
+                    # we assume we get here because we were
+                    # adding int to nested PresentationAndLoc
+                    # objects
+                    # hasattr(data_loc_array[ix, j], 'locs') == True
+                    inner_view_and_loc = data_loc_array[ix, j]
+                    x = PresentationLayoutManager.shift_loc(
+                            inner_view_and_loc,
+                            rows, cols)
+                    new_locs[ix, j] = x
+        df.loc[:, df.columns.values] = new_locs
+        #print('Done shifting')
         return PresentationAndLoc(
             model=presentation_and_loc.model,
             locs=Locs(header_loc=new_header_loc,
@@ -407,8 +432,9 @@ class IndexNode:
     @staticmethod
     def apply(f, root, order='post'):
         '''
-        root: root of the hierarchical columns/index
-        order: apply in pre-order or post-order or inorder
+        Args:
+            root: root of the hierarchical columns/index
+            order: apply in pre-order or post-order or inorder
         '''
         # clone whole tree
         new_root = IndexNode.deep_clone(root)
@@ -422,10 +448,10 @@ class IndexNode:
     @staticmethod
     def index_to_index_node(index):
         '''
-        Convert a column index to a tree view that can be used
-        for rendering
+        Convert a column index to a tree view that can be used for rendering
 
-        index: usually df.columns, can all support df.index
+        Args:
+            index: usually df.columns, can all support df.index
         '''
 
         root = IndexNode()
@@ -481,9 +507,7 @@ class IndexNode:
     def resolve_loc(tree, offsets, col_widths):
         '''
         Args:
-        col_widths: dictionary of column width of each column, indexed by
-        column key. For multi-hierarchical columns the key would a tuple
-        where the tuple is the unique index into the column. Eg {('a', 1): 10}
+            col_widths: dictionary of column width of each column, indexed by column key. For multi-hierarchical columns the key would a tuple where the tuple is the unique index into the column. Eg {('a', 1): 10}
         '''
 
         # make this immutable

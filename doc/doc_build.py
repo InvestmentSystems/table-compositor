@@ -4,6 +4,15 @@ import sphinx
 #sphinx.add_lexer('yaml', lexers.YamlLexer())
 
 
+# Note: The api.rst file will not successfully build
+# with this setup, since sphinx to work with ReadTheDocs
+# we cannot reference the table_compositor package from `package`
+# module as root.
+# For example
+# package.public.table_compositor.table_compositor.* in api.rst will not work.
+# Therefore, those warning can be ignored.
+
+
 if __name__ == '__main__':
     # must be in this directory
     doc_dir = os.path.abspath(os.path.dirname(__file__))

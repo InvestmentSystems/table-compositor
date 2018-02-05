@@ -38,8 +38,6 @@ class GridLayoutManager:
                 child_values.append(r)
             return Cell(vertical=cell.vertical, children=child_values)
 
-        print(cell)
-
 
     @staticmethod
     def foldl(cell, f, accum):
@@ -89,6 +87,7 @@ class GridLayoutManager:
                 new_max_row = max(new_max_row, max_row)
 
         #print('returning...', (new_max_row, new_max_col), child_values)
+        #print('Done shift grid')
         return ((new_max_row, new_max_col),
                 Cell(vertical=cell.vertical, children=child_values))
 

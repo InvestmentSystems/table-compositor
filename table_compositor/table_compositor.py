@@ -3,6 +3,9 @@ Module that supports operations to map a dataframe to an excel worksheet like en
 and also create Excel files with all fancy formatting.
 '''
 
+import pandas as pd
+import itertools as it
+
 from .presentation_model import IndexNode
 from .presentation_model import PresentationLayoutManager
 from .presentation_model import StyleWrapper
@@ -159,6 +162,40 @@ def _build_presentation_model_for_html(
         index_name_style_func=index_name_style_func,
         **kwargs)
 
+def _raise_on_invalid_index(index, label: str):
+
+    # the index and columns of the provided dataframe should be unique. if the index/columns of the dataframe are multi-hierarchical  then at each level the values should be present contigously
+    # For example in :
+    # df.columns =  df.columns = pd.MultiIndex.from_tuples([('a', 1), ('a', 2), ('b', 1), ('a', 3)])
+    # the first level of values turns out to be ['a', 'a', 'b', 'a']. Note that 'a' is
+    # not contigous and that is not valid.
+
+    detailed_msg = """\nFor presentation model to process index and columns, the index and columns should be unique. For multi-heirarchical indices, the values should becontiguous at the first level. For example in : \t\n df.columns = pd.MultiIndex.from_tuples([('a', 1), ('a', 2), ('b', 1), ('a', 3)]) \n the first level of values turns out to be ['a', 'a', 'b', 'a']. \n Note that 'a' is not contiguous and therefore the index/column is not a valid value."""
+
+    if isinstance(index, pd.MultiIndex):
+        values = index.tolist()
+        values_at_first_level, *_ = zip(*values)
+        by_group = tuple((k for k, _ in it.groupby(values_at_first_level)))
+        if len(set(values_at_first_level)) != len(by_group):
+            msg = ''.join((
+                label,
+                ' not contiguous at the first level.',
+                detailed_msg,
+                "\n Value Passed: ",
+                str(index)))
+            raise ValueError(msg)
+        return
+
+    # if single hierarchical
+    if len(set(index)) != len(index):
+        msg = ''.join((
+            label,
+            ' not unique.',
+            detailed_msg,
+            "\n Value Passed: ",
+            str(index)))
+        raise ValueError(msg)
+
 
 def _build_presentation_model(
         *,
@@ -186,6 +223,19 @@ def _build_presentation_model(
         index_name_func:
         index_name_style_func:
     """
+
+    # cleanup kwargs
+    kwargs = kwargs or {}
+    kwargs['hide_index'] = kwargs.get('hide_index', False)
+    kwargs['hide_header'] = kwargs.get('hide_header', False)
+    # FIXME: covert method revisit
+    kwargs['use_convert'] = kwargs.get('use_convert', False)
+
+    # table compositor needs indices/column names to be unique.
+    if not kwargs['hide_index']:
+        _raise_on_invalid_index(df.index, 'index')
+    if not kwargs['hide_header']:
+        _raise_on_invalid_index(df.columns, 'columns')
 
     column_index_tree = IndexNode.index_to_index_node(df.columns)
     header_value_view = IndexNode.apply(
@@ -218,12 +268,6 @@ def _build_presentation_model(
     index = PresentationElements(values=index_value_view, style=style_index_view)
     index_name = PresentationElements(values=index_name_values, style=index_name_style)
 
-    # cleanup kwargs
-    kwargs = kwargs or {}
-    kwargs['hide_index'] = kwargs.get('hide_index', False)
-    kwargs['hide_header'] = kwargs.get('hide_header', False)
-    # FIXME: covert method revisit
-    kwargs['use_convert'] = kwargs.get('use_convert', False)
 
     return PresentationModel(
         header=header,

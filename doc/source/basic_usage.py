@@ -21,7 +21,7 @@ def basic_example2():
             return OpenPyxlStyleHelper.get_style(number_format='$#,##.00')
 
     # create a presentation model
-    # note the OpenPyxlStyleHeloer function available in xlsx_styles module. But a return value of style function
+    # note the OpenPyxlStyleHelper function available in xlsx_styles module. But a return value of style function
     # can be any dict whose keys are attributes of the OpenPyxl cell object.
     presentation_model = build_presentation_model(
         df=df,
