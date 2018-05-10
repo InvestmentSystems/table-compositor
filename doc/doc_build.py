@@ -25,3 +25,6 @@ if __name__ == '__main__':
             source_dir,
             build_dir]
     status = sphinx.main(args)
+
+    import webbrowser
+    webbrowser.open(os.path.join(build_dir, 'index.html'))

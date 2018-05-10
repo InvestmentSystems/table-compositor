@@ -1,6 +1,7 @@
-# These are the libraries with which the current version of
-# table-compositor has been developed and tested.
-
-numpy==1.13.1
-openpyxl==2.3.0
 pandas==0.17.1
+numpy==1.14.2
+openpyxl==2.3.0
+Pygments==2.2.0
+sphinx-jinja==0.3.0
+sphinxcontrib-napoleon==0.6.1
+sphinx_rtd_theme>=0.3.1
