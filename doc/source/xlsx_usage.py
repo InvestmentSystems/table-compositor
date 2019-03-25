@@ -84,7 +84,7 @@ class XLSXExample1:
         fp = os.path.join(tempdir, 'example1.xlsx')
         layout = [pm]
         print('Writing to ' + fp)
-        xlsxw.XLSXWriter.to_xlsx(layout, output_fp=fp)
+        xlsxw.OpenPyxlCompositor.to_xlsx(layout=layout, output_fp=fp)
 # end_XLSXExample1
 
 
@@ -175,7 +175,7 @@ class XLSXExample2:
         fp = os.path.join(tempdir, 'example2.xlsx')
         layout = [pm]
         print('Writing to ' + fp)
-        xlsxw.XLSXWriter.to_xlsx(layout, output_fp=fp)
+        xlsxw.OpenPyxlCompositor.to_xlsx(layout=layout, output_fp=fp)
 # end_XLSXExample2
 
 # start_XLSXExample3
@@ -293,7 +293,7 @@ class XLSXExample3:
         tempdir = tempfile.gettempdir()
         fp = os.path.join(tempdir, 'example3.xlsx')
         print('Writing to ' + fp)
-        xlsxw.XLSXWriter.to_xlsx(layout, output_fp=fp, orientation='horizontal')
+        xlsxw.OpenPyxlCompositor.to_xlsx(layout=layout, output_fp=fp, orientation='horizontal')
 # end_XLSXExample3
 
 # start_XLSXExample4
@@ -381,7 +381,7 @@ class XLSXExample4:
         tempdir = tempfile.gettempdir()
         fp = os.path.join(tempdir, 'example4.xlsx')
         print('Writing to ' + fp)
-        xlsxw.XLSXWriter.to_xlsx(layout, output_fp=fp, orientation='horizontal')
+        xlsxw.OpenPyxlCompositor.to_xlsx(layout=layout, output_fp=fp, orientation='horizontal')
 # end_XLSXExample4
 
 def main():

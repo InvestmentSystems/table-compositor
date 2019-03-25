@@ -1,8 +1,7 @@
 from itertools import groupby
-from .grid import GridLayoutManager
-from .grid import Cell
-from .presentation_model import StyleWrapper
-from .presentation_model import ValueAndStyleAttributes
+from table_compositor.grid import GridLayoutManager
+from table_compositor.grid import Cell
+from table_compositor.presentation_model import StyleWrapper
 
 class HTMLWriter:
 

@@ -1,7 +1,7 @@
 Layouts
 =======
 
-Apart from providing styling and formatting facilities, the table compositor library
+Apart from providing styling and formatting facilities, the library
 also provides a powerful way to layout multiple tables on one
 sheet. In this section we will look at some examples.
 

@@ -49,7 +49,7 @@ an xlsx file
 
    import pandas as pd
    from table_compositor.table_compositor import build_presentation_model
-   from table_compositior.xlsx_writer import XLSXWriter
+   from table_compositior.xlsx_writer import OpenPyxlCompositor
 
    sample_df = pd.DataFrame(dict(a=[10, 20, 30, 40, 50], b=[0.1, 0.9,0.2, 0.6,0.3]), index=[1,2,3,4,5])
 
@@ -61,7 +61,7 @@ an xlsx file
 
    # render to xlsx
    output_fp = '/tmp/example1.xlsx'
-   XLSXWriter.to_xlsx(layout, output_fp=output_fp)
+   OpenPyxlCompositor.to_xlsx(layout=layout, output_fp=output_fp)
 
 Running this code produces the following output:
 
@@ -174,7 +174,7 @@ We update our previous example to do the following:
    import tempfile
    import pandas as pd
    from table_compositor.table_compositor import build_presentation_model
-   from table_compositor.xlsx_writer import XLSXWriter
+   from table_compositor.xlsx_writer import OpenPyxlCompositor
    from table_compositor.xlsx_styles import OpenPyxlStyleHelper
 
 .. code:: python
@@ -209,7 +209,7 @@ We update our previous example to do the following:
 
         # render to xlsx
         output_fp = os.path.join(tempfile.gettempdir(), 'basic_example2.xlsx')
-        XLSXWriter.to_xlsx(layout, output_fp=output_fp)
+        OpenPyxlCompositor.to_xlsx(layout=layout, output_fp=output_fp)
 
 
 
@@ -241,13 +241,13 @@ Note that the IndexNode argument passed to the callback function has a
 node.key field that unique identifies each cell with a name that is
 built appending the value of each item in the index or column hierarchy.
 
-.. code:: python	
+.. code:: python
 
-    import os 
-    import tempfile 
-    import pandas as pd 
-    from table_compositor.table_compositor import build_presentation_model 
-    from table_compositor.xlsx_writer import XLSXWriter 
+    import os
+    import tempfile
+    import pandas as pd
+    from table_compositor.table_compositor import build_presentation_model
+    from table_compositor.xlsx_writer import OpenPyxlCompositor
     from table_compositor.xlsx_styles import OpenPyxlStyleHelper
 
 .. code:: python
@@ -297,7 +297,7 @@ built appending the value of each item in the index or column hierarchy.
 
         # render to xlsx
         output_fp = os.path.join(tempfile.gettempdir(), 'basic_example3.xlsx')
-        XLSXWriter.to_xlsx(layout, output_fp=output_fp)
+        OpenPyxlCompositor.to_xlsx(layout=layout, output_fp=output_fp)
 
 
 
@@ -327,3 +327,17 @@ All the above rendering and layout capabilities we have seen above is also avail
 .. image:: doc/source/_static/html_example2.png
 .. image:: doc/source/_static/html_example3.png
 .. image:: doc/source/_static/html_example4.png
+
+
+Supported Xlsx Writer Engines
+------------------------------
+
+All the usages examples provided with this documentation use the `engine=openpyxl' as default argument to the presentation model. `table-compositor` can also be used with 'xlsxwriter` library. While switching the engine, the callback's also need to also provide compatiable style objects. That is the callback functions returing style attributes will have to return a dictionary of styles whose keys match the `Format` objects required by `xlsxwriter'. Example of style objects needed for `xlsxwriter` can be found in `XlsxWriterStyleHelper` class.
+
+
+Performance Considerations
+--------------------------
+
+1. If the values in the source dataframe does not have to be transformed, than not providing a default `data_value_func` argument while building the presentation_model is recommended. This will avoid unnecessary function callbacks.
+2. If cell level formatting control is not required, then it is recommended that `column_style_func` argument be set rather than setting up the `data_style_func` argument. This will drastically reduce the number of internal objects the library will have to create. This approach leads to a significant improvement in performance. The time taken will be just a fraction of the time that would take if `cell` level control is desired.
+3. XlsxWriter seems to perform better than openpyxl while writing to xlsx files. This can be observed by running the benchmarks/benchmark.py module. This `engine` argument provides an option to switch between XlsxWriter and OpenPyxlWriter. Remember to build provide compatible callback funcs that build style objects that are compatible with the `engine` that is being used.

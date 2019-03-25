@@ -6,6 +6,16 @@ from the given dataframe. Each example is self-contained inside
 a class. We have some helper functions to provide the data we need for
 this examples
 
+All examples listed in this section use `OpenPyxlStyleHelper` and
+`OpenPyxlCompositor`. To use the `xlsxwriter` library replace these
+with `XlsxWriterStyleHelper` and `XlsxWriterCompositor` respectively.
+
+If the callback funcs do not use the `*StyleHelpers` and return their
+own `Style` objects then the objects returned should be compatible
+with the value `engine` provided to the engine attribute.
+
+Examples of relevant style objects can be found respective documentations for the `engine` being used.
+
 Helper Functions (Data loading routines)
 ----------------------------------------
 

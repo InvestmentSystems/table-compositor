@@ -49,3 +49,13 @@ Style with alignment and fonts
    # note that we return a dict, whose key = `number_format` which is an
    # attrbute of  `cell` object in `openpyxl`
    style = dict(alignment=Alignment(horizontal=center, font=font)
+
+
+Using a different XLXS Writer Engine
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Note that if `xlsxwriter` library is uses, the keys in the dictionary
+returned by the callback funcs should match the keys required to build
+the `Format` object declared in the `xlsxwriter` library. Some
+examples of these keys can be found in
+`xlsx_styles.XlsxWriterStyleHelper` class.

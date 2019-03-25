@@ -8,6 +8,8 @@ from openpyxl.styles import PatternFill
 from openpyxl.styles import fills
 from openpyxl.styles import Font
 
+SENTINEL = object()
+
 class OpenPyxlStyleHelper:
 
     # good reference:
@@ -70,10 +72,10 @@ class OpenPyxlStyleHelper:
             alignment='center',
             font=Font(bold=True, color='FFFFFF'),
             bgColor='4F81BD',
-            border=None):
+            border=SENTINEL):
 
         '''
-        Provides styles for default headers
+        Provides styles for default headers for OpenPyxl engine
 
         Args:
             alignment: 'center', 'left', 'right' used for horizontal alignment
@@ -85,7 +87,7 @@ class OpenPyxlStyleHelper:
             A dict of key-values pairs, where each key is a attr of the `cell` object in openyxl and value is valid value of that attr.
         '''
 
-        if not border:
+        if border is SENTINEL:
             border = OpenPyxlStyleHelper.CustomBorders.thin_white_border
 
         return dict(
@@ -100,7 +102,9 @@ class OpenPyxlStyleHelper:
     def get_style(
             number_format='General',
             bg_color=None,
-            border=None):
+            border=None,
+            font=None
+        ):
 
         '''
         Helper method to return a openpyxl Style
@@ -118,14 +122,14 @@ class OpenPyxlStyleHelper:
             pattern_fill = PatternFill(
                 fgColor=Color(bg_color), patternType=fills.FILL_SOLID)
 
-#        if not border:
-#            border = OpenPyxlStyleHelper.CustomBorders.thin_black_border
-
         border = border or Border()
-        return dict(
+        result = dict(
             fill=pattern_fill,
             border=border,
             number_format=number_format)
+        if font is not None:
+            result['font'] = font
+        return result
 
 
 class XLSXWriterDefaults:
@@ -252,3 +256,146 @@ class XLSXWriterDefaults:
         def _value_func(index_name):
             return index_name or ''
         return _value_func
+
+
+class XlsxWriterStyleHelper:
+    '''
+    Class provides style objects for XlsxWriter library uses to render xlsx files
+    '''
+
+    # good reference:
+    # https://www.ozgrid.com/Excel/excel-custom-number-formats.htm
+    DOLLAR_FORMAT = '_($* #,##0_);_($* (#,##0);_($* "-"??_);_(@_)'
+    CENTS_FORMAT = '_($* #,##0.00_);_($* (#,##0.00);_($* "-"??_);_(@_)'
+
+    # without dollar sign, but has same rendering format for currency
+    GENERAL_CURRENCY_FORMAT = '_(* #,##0.00_);_(* (#,##0.00);_(* "-"??_);_(@_)'
+    PERCENT_FORMAT = '0.00%'
+
+
+    class CustomBorders:
+
+        thin_white = dict(border_style=1, color='#FFFFFF')
+        thick_white = dict(border_style=2, color='#FFFFFF')
+
+        thin_black = dict(border_style=1, color='#000000')
+
+        border = dict(left=thin_white, right=thin_white,
+                top=thin_white, bottom=thin_white)
+        left_border = dict(left=thin_black, right=thin_white,
+                top=thin_white, bottom=thin_white)
+        right_border = dict(
+            left=thin_white, right=thick_white,
+            top=thin_white, bottom=thin_white)
+
+        top_right_border = dict(left=thin_white, right=thin_black,
+                top=thin_black, bottom=thin_white)
+        top_left_border = dict(left=thin_white, right=thin_black,
+                top=thin_black, bottom=thin_white)
+
+        top_border = dict(left=thin_white, right=thin_white,
+                top=thin_black, bottom=thin_white)
+
+        bottom_right_border = dict(left=thin_white, right=thin_black,
+                top=thin_white, bottom=thin_black)
+        bottom_left_border = dict(left=thin_black, right=thin_white,
+                top=thin_white, bottom=thin_black)
+        bottom_border = dict(left=thin_white, right=thin_white,
+                top=thin_white, bottom=thin_black)
+
+        thin_border = dict(left=thin_white, right=thin_white,
+                        top=thin_white, bottom=thin_white)
+
+        thin_black_border = dict(
+            left=thin_black, right=thin_black,
+            top=thin_black, bottom=thin_black)
+
+        thin_white_border = dict(
+            left=thin_white, right=thin_white,
+            top=thin_white, bottom=thin_white)
+
+    @staticmethod
+    def default_header_style(
+            *,
+            number_format='General',
+            alignment='center',
+            font=None,
+            bgColor='#4F81BD',
+            border=SENTINEL):
+
+        '''
+        Provides styles for default headers for XlsxWriter engine
+
+        Args:
+            alignment: 'center', 'left', 'right' used for horizontal alignment
+            font: an openpyxl.Font instance
+            bgColor: hex color that will be used as background color in the fill pattern
+            border: an openpyxl.Border instance, defaults to thin white border
+
+        Returns:
+            A dict of key-values pairs, where each key is a attr of the `cell` object in openyxl and value is valid value of that attr.
+        '''
+
+        if not font:
+            font = dict(bold=True, color='#FFFFFF')
+
+        if border is SENTINEL:
+            border = XlsxWriterStyleHelper.CustomBorders.thin_white_border
+
+        return dict(
+                num_format=number_format,
+                align=alignment,
+                valign='vcenter',
+                font_bold=font.bold,
+                font_color=font.color,
+                pattern=1, # 1 is solid in XlsxWriter
+                bg_color=bgColor,
+                top=border['top']['border_style'],
+                left=border['left']['border_style'],
+                bottom=border['bottom']['border_style'],
+                right=border['bottom']['border_style'],
+                top_color=border['top']['color'],
+                left_color=border['left']['color'],
+                bottom_color=border['bottom']['color'],
+                right_color=border['right']['color'])
+
+
+    @staticmethod
+    def get_style(
+            number_format='General',
+            bg_color=None,
+            border=SENTINEL):
+
+        '''
+        Helper method to return Style dictionary for XlsxWriter engine
+
+        Args:
+            number_format: an xlsx compatibale number format string
+            bg_color: hex color that will be used as background color in the fill pattern
+            border: an openpyxl.Border instance, defaults to thin white border
+
+        Returns:
+            A dict of key-values pairs, where each key/value is compatible with the `Format` object in XlsxWriter library.
+        '''
+        styles = dict(
+                num_format=number_format)
+
+        if bg_color:
+            styles['pattern'] = 1
+            styles['bg_color'] = bg_color
+
+        if border is SENTINEL:
+            border = XlsxWriterStyleHelper.CustomBorders.thin_white_border
+
+        border_attrs = dict(
+                top=border['top']['border_style'],
+                left=border['left']['border_style'],
+                bottom=border['bottom']['border_style'],
+                right=border['right']['border_style'],
+                top_color=border['top']['color'],
+                left_color=border['left']['color'],
+                bottom_color=border['bottom']['color'],
+                right_color=border['right']['color'])
+        styles.update(border_attrs)
+
+        return styles

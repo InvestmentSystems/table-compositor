@@ -27,6 +27,9 @@ Helper XLSX Styles
 .. autoclass:: table_compositor.xlsx_styles.OpenPyxlStyleHelper
    :members:
 
+.. autoclass:: table_compositor.xlsx_styles.XlsxWriterStyleHelper
+   :members:
+
 .. autoclass:: table_compositor.xlsx_styles.XLSXWriterDefaults
    :members:
 

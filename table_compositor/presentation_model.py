@@ -134,6 +134,11 @@ class PresentationLayoutManager:
 
     @staticmethod
     def apply(f, df):
+        # we short circuit this if no changes are requested
+        # this is useful for value_func where values rarely change
+        if f is None:
+            return df.copy()
+
         df = pd.DataFrame(index=df.index, columns=df.columns)
         index_length = len(df.index)
         for c in df.columns.values:
@@ -142,6 +147,17 @@ class PresentationLayoutManager:
                 a[ix] = f(i, c)
             df.loc[:, c] = a
         return df
+
+    @staticmethod
+    def apply_at_column_level(f, df):
+        new_df = pd.DataFrame(index=df.index, columns=df.columns)
+        index_length = len(df.index)
+        for c in df.columns.values:
+            a = np.empty(index_length, dtype=object)
+            column_level_value = f(c)
+            a.fill(column_level_value)
+            new_df.loc[:, c] = a
+        return new_df
 
     @staticmethod
     def resolve_loc(presentation_model, offsets=(0, 0, 0, 0), nesting_level=0):
@@ -455,6 +471,11 @@ class IndexNode:
         '''
 
         root = IndexNode()
+
+        # handle frames without an index but only columns
+        if len(index) == 0:
+           return root
+
         if not isinstance(index.values[0], tuple):
             # not an multi-index
             root.add_children(IndexNode(value=i, parent=root, key=(i,))

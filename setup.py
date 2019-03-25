@@ -19,7 +19,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='table-compositor',
-    version='1.0.1',
+    version='1.1.0',
 
     description='Library to render table-like data structure into XLSX and other formats.',
     long_description=long_description,

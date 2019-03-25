@@ -29,23 +29,25 @@ Every use of this library involves four steps.
 
 3. Create a `layout` of multiple `presentation models` (if we want more than one table rendered in same xlsx sheet or same html page)
 
-4. Call the `render_xlsx` or `render_html` functions on the respective writers, XLXSWriter or HTMLWriter
+4. Call the `render_xlsx` or `render_html` functions on the respective writers. For xlsx files either OpenPyxlCompositor(uses `openpyxl` library) or XlsxWriterCompositor(uses `xlsxwriter` library). For HTML use the `HTMLWriter`.
 
 
 A Quick Look at a Xlsx example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We will start with a simple dataframe and render the dataframe as is to an xlsx file
+We will start with a simple dataframe and render the dataframe as-is to a xlsx file
 
 .. code-block:: python
 
     import pandas as pd
     from table_compositor.table_compositor import build_presentation_model
-    from table_compositior.xlsx_writer import XLSXWriter
+    from table_compositior.xlsx_writer import OpenPyxlCompositor
+    # Note: use XlsxWriterCompositor to use xlsxwriter library
 
     sample_df = pd.DataFrame(dict(a=[10, 20, 30, 40, 50], b=[0.1, 0.9,0.2, 0.6,0.3]), index=[1,2,3,4,5])
 
     # create a presentation model
+    # defaults to engine='openpyxl'. Needs to be set to 'xlsxwriter' to use `xlsxwriter` library instead.
     presentation_model = build_presentation_model(df=sample_df)
 
     # create a layout, which is usually a nested list of presentation models
@@ -53,7 +55,7 @@ We will start with a simple dataframe and render the dataframe as is to an xlsx 
 
     # render to xlsx
     output_fp = '/tmp/example1.xlsx'
-    XLSXWriter.to_xlsx(layout, output_fp=output_fp)
+    OpenPyxlCompositor.to_xlsx(layout, output_fp=output_fp)
 
 
 Running this code produces the following output:
@@ -64,7 +66,7 @@ In the above code snippet, we first created a dataframe called  ``sample_df``.
 
 To render this `dataframe`, we first invoke `build_presentation_model`. The `build_presentation_model` accepts the `dataframe` as its first argument. In this example, we use the `defaults` provided by this method for all other arguments. The `build_presentation_model` returns an `presentation_model` object.
 
-Before we call `XlSXWriter.to_xlsx` we create a `layout`. A `layout` is a nested list of `presenation_models`. In our case, since we have only one `presentation_model` we create a list with a single element. Later on when we work with multiple presentation models that need to be rendered on to the same sheet, we could create nested list such as `[[model1, model2], [model3]]` etc.
+Before we call `OpenPyxlCompositor.to_xlsx` we create a `layout`. A `layout` is a nested list of `presentation_models`. In our case, since we have only one `presentation_model` we create a list with a single element. Later on when we work with multiple presentation models that need to be rendered on to the same sheet, we could create nested list such as `[[model1, model2], [model3]]` etc.
 
 Building the Presentation Model
 --------------------------------
@@ -73,7 +75,7 @@ The `build_presentation_model` function is the most important interface in this 
 
 We will now build up on our previous example and add styling to the report we generate. Before, we do that lets take a quick look at the signature of `build_presentation__model`.
 
-.. autofunction:: package.public.table_compositor.table_compositor.table_compositor.build_presentation_model
+.. autofunction:: table_compositor.table_compositor.build_presentation_model
 
 
 Improving on our first iteration

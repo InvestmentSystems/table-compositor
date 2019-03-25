@@ -3,7 +3,10 @@ import os
 import tempfile
 import pandas as pd
 from table_compositor.table_compositor import build_presentation_model
-from table_compositor.xlsx_writer import XLSXWriter
+
+# There are equivalent classes for using xlsxwriter library. Namely,
+# XlsxWriterCompositor and XlsxWriterStyleHelper
+from table_compositor.xlsx_writer import OpenPyxlCompositor
 from table_compositor.xlsx_styles import OpenPyxlStyleHelper
 
 # end_imports
@@ -39,7 +42,7 @@ def basic_example2():
 
     # render to xlsx
     output_fp = os.path.join(tempfile.gettempdir(), 'basic_example2.xlsx')
-    XLSXWriter.to_xlsx(layout, output_fp=output_fp)
+    OpenPyxlCompositor.to_xlsx(layout=layout, output_fp=output_fp)
 
 # end_basic_example_2
 
@@ -89,7 +92,7 @@ def basic_example3():
 
     # render to xlsx
     output_fp = os.path.join(tempfile.gettempdir(), 'basic_example3.xlsx')
-    XLSXWriter.to_xlsx(layout, output_fp=output_fp)
+    OpenPyxlCompositor.to_xlsx(layout=layout, output_fp=output_fp)
 
 # end_basic_example_3
 
@@ -127,10 +130,10 @@ def layout_example1():
     # render to xlsx
     output_fp = os.path.join(tempfile.gettempdir(), 'layout_vertical_example1.xlsx')
     # the default value for orientation is 'vertical'
-    XLSXWriter.to_xlsx(layout, output_fp=output_fp, orientation='vertical')
+    OpenPyxlCompositor.to_xlsx(layout=layout, output_fp=output_fp, orientation='vertical')
 
     output_fp = os.path.join(tempfile.gettempdir(), 'layout_horizontal_example1.xlsx')
-    XLSXWriter.to_xlsx(layout, output_fp=output_fp, orientation='horizontal')
+    OpenPyxlCompositor.to_xlsx(layout=layout, output_fp=output_fp, orientation='horizontal')
     print('Writing xlsx file=', output_fp)
 
     # mutiple nesting
@@ -138,7 +141,7 @@ def layout_example1():
                       [presentation_model, [presentation_model, presentation_model]]]
 
     output_fp = os.path.join(tempfile.gettempdir(), 'layout_complex_example1.xlsx')
-    XLSXWriter.to_xlsx(layout_complex, output_fp=output_fp, orientation='vertical')
+    OpenPyxlCompositor.to_xlsx(layout=layout_complex, output_fp=output_fp, orientation='vertical')
     print('Writing xlsx file=', output_fp)
     # end_layout_code_1
 
@@ -146,6 +149,6 @@ def layout_example1():
 
 
 if __name__ == '__main__'    :
-    #basic_example2()
-    #basic_example3()
+    basic_example2()
+    basic_example3()
     layout_example1()
