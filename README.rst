@@ -37,7 +37,7 @@ Every use of this library involves four steps.
 3. Create a layout of multiple presentation models (if we want more than
    one table rendered in same xlsx sheet or same html page)
 4. Call the render_xlsx or render_html functions on the respective
-   writers, XLXSWriter or HTMLWriter
+   writers, OpenPyxlCompositor or XlxsWriterCompositor for xlxs and HTMLWriter for HTML output.
 
 A Quick Look at a Xlsx example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -115,6 +115,7 @@ the same sheet, we could create nested list such as
     <li><strong>index_style_func</strong> &#8211; func that takes a object of type <cite>IndexNode</cite>. The return value of this function is similar to data_style_func.</li>
     <li><strong>index_name_func</strong> &#8211; func that returns a string for index name (value to be displayed on top-left corner, above the index column)</li>
     <li><strong>index_name_style</strong> &#8211; the style value same as data_style_func that will be used to style the cell</li>
+    <li><strong>engine</strong> &#8211; required while building presentation model for xlsx. Argument ignored for HTML rendering. This argument is used to provide the default callback style functions, where the style dictionary returned by the callback functions should be compatible with the engine being used. Supported values are 'openpyxl' or 'xlsxwriter'</li>
     <li><strong>kwargs</strong> &#8211; <p>&#8216;hide_index&#8217; - if True, then hide the index column, default=False</p>
     <p>&#8216;hide_header, - if True, then hide the header, default=False</p>
     <p>&#8216;use_convert&#8217; - if True, do some conversions from dataframe values to values excel can understand for example np.NaN are converted to NaN strings</p>
@@ -282,7 +283,7 @@ built appending the value of each item in the index or column hierarchy.
             elif node.key[1] == 'y':
                 bg_color = '6DC066'
             return OpenPyxlStyleHelper.get_style(bg_color=bg_color)
-
+D
         # create a presentation model
         # note the OpenPyxlStyleHeloer function available in xlsx_styles module. But a return value of style function
         # can be any dict whose keys are attributes of the OpenPyxl cell object.
