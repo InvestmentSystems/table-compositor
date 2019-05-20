@@ -65,7 +65,7 @@ install:
   - pip install -r requirements.txt
 
 script:
- - pytest --cov=static_frame
+ - pytest --cov=table_compositor  
 
 after_success:
   - codecov
