@@ -346,8 +346,8 @@ class XlsxWriterStyleHelper:
                 num_format=number_format,
                 align=alignment,
                 valign='vcenter',
-                font_bold=font.bold,
-                font_color=font.color,
+                bold=font['bold'],
+                font_color=font['color'],
                 pattern=1, # 1 is solid in XlsxWriter
                 bg_color=bgColor,
                 top=border['top']['border_style'],
