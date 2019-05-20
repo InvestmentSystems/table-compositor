@@ -3,7 +3,7 @@
     :target: https://travis-ci.org/InvestmentSystems/table-compositor
 
 .. image:: https://readthedocs.org/projects/table-compositor/badge/?version=latest
-    :target: https:/table-compositor.readthedocs.io/en/latest/?badge=latest
+    :target: https://table-compositor.readthedocs.io/en/latest/?badge=latest
 
 .. image:: https://badge.fury.io/py/table-compositor.svg
    :target: https://badge.fury.io/py/table-compositor
