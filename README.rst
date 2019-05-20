@@ -1,3 +1,15 @@
+
+.. image:: https://travis-ci.org/InvestmentSystems/table-compositor.svg?branch=master
+    :target: https://travis-ci.org/InvestmentSystems/table-compositor
+
+.. image:: https://readthedocs.org/projects/static-frame/badge/?version=latest
+    :target: https:/table-compositor.readthedocs.io/en/latest/?badge=latest
+
+.. image:: https://badge.fury.io/py/table-compositor.svg
+   :target: https://badge.fury.io/py/table-compositor
+
+
+
 table-compositor
 =================
 
