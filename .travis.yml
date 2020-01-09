@@ -21,18 +21,6 @@ matrix:
       dist: xenial
       language: python
 
-
-    - name: CPython 3.6.8 on Windows Server 1803
-      os: windows
-      before_install: choco install python --version 3.6.8
-      env: PATH=/c/Python36:/c/Python36/Scripts:$PATH
-
-    - name: CPython 3.7.3 on Windows Server 1803
-      os: windows
-      before_install: choco install python --version 3.7.3
-      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
-
-
     - name: CPython 3.6.8 on macOS 10.13
       os: osx
       before_install: brew upgrade pyenv; pyenv install $PYENV_VERSION
