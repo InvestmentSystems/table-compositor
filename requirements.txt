@@ -2,7 +2,7 @@ pandas==0.24.2
 numpy==1.16.2
 openpyxl==2.3.0
 xlsxwriter==1.1.5
-Pygments==2.2.0
+Pygments==2.7.4
 sphinx-jinja==0.3.0
 sphinxcontrib-napoleon==0.6.1
 sphinx_rtd_theme>=0.3.1
