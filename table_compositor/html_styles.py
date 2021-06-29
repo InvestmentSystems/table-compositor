@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-from ISLib import np_raise as np
+import numpy as np
 from table_compositor.html_writer import HTMLWriter
 from table_compositor.util import df_type_to_str
 

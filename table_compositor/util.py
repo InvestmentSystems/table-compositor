@@ -2,7 +2,7 @@ import numbers
 
 import pandas as pd
 
-from ISLib import np_raise as np
+import numpy as np
 
 
 def df_type_to_str(i):

@@ -4,7 +4,7 @@ from itertools import product
 import pandas as pd
 
 import table_compositor.table_compositor as tbc
-from ISLib import np_raise as np
+import numpy as np
 from table_compositor.util import df_type_to_str
 from table_compositor.xlsx_styles import (
     OpenPyxlStyleHelper,

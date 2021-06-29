@@ -20,7 +20,7 @@ from itertools import groupby
 import pandas as pd
 import static_frame as sf
 
-from ISLib import np_raise as np
+import numpy as np
 
 StyleWrapper = namedtuple("StyleWrapper", ["user_style"])
 

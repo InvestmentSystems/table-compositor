@@ -11,7 +11,7 @@ import pandas as pd
 
 import table_compositor.table_compositor as tbc
 import table_compositor.xlsx_writer as tcew
-from ISLib import np_raise as np
+import numpy as np
 from table_compositor.xlsx_styles import (
     OpenPyxlStyleHelper,
     XlsxWriterStyleHelper,
