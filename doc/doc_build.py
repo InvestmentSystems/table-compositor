@@ -1,5 +1,5 @@
 import os
-import sphinx
+from sphinx.cmd.build import main
 #from pygments import lexers
 #sphinx.add_lexer('yaml', lexers.YamlLexer())
 
@@ -20,11 +20,11 @@ if __name__ == '__main__':
     source_dir = os.path.join(doc_dir, 'source')
     build_dir = os.path.join(doc_dir, 'build', 'html')
 
-    args = ['sphinx', '-E', '-b', 'html',
+    args = ['-E', '-b', 'html',
             '-d', doctrees_dir,
             source_dir,
             build_dir]
-    status = sphinx.main(args)
+    status = main(args)
 
     import webbrowser
     webbrowser.open(os.path.join(build_dir, 'index.html'))

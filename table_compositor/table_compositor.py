@@ -1,38 +1,45 @@
-'''
+"""
 Module that supports operations to map a dataframe to an excel worksheet like entity
 and also create Excel files with all fancy formatting.
-'''
+"""
 
-import pandas as pd
 import itertools as it
 
-from table_compositor.presentation_model import IndexNode
-from table_compositor.presentation_model import PresentationLayoutManager
-from table_compositor.presentation_model import StyleWrapper
-from table_compositor.presentation_model import PresentationElements
-from table_compositor.presentation_model import PresentationModel
-from table_compositor.xlsx_styles import OpenPyxlStyleHelper
-from table_compositor.xlsx_styles import XlsxWriterStyleHelper
+import pandas as pd
+
 from table_compositor.html_styles import HTMLWriterDefaults
+from table_compositor.presentation_model import (
+    IndexNode,
+    InternalFrame,
+    PresentationElements,
+    PresentationLayoutManager,
+    PresentationModel,
+    StyleWrapper,
+)
+from table_compositor.xlsx_styles import (
+    OpenPyxlStyleHelper,
+    XlsxWriterStyleHelper,
+)
 
 
 def build_presentation_model(
-        *,
-        df,
-        output_format='xlsx',
-        data_value_func=None,
-        column_style_func=None,
-        data_style_func=None,
-        header_style_func=None,
-        header_value_func=None,
-        index_style_func=None,
-        index_value_func=None,
-        index_name_func=None,
-        index_name_style_func=None,
-        engine='openpyxl',
-        **kwargs):
+    *,
+    df,
+    output_format="xlsx",
+    data_value_func=None,
+    column_style_func=None,
+    data_style_func=None,
+    header_style_func=None,
+    header_value_func=None,
+    index_style_func=None,
+    index_value_func=None,
+    index_name_func=None,
+    index_name_style_func=None,
+    engine="openpyxl",
+    **kwargs,
+):
 
-    """ Construct and return the presentation model that will be used while rendering to html/xlsx formats. The returned object has all the information required to render the tables in the requested format. The details of the object is transparent to the caller. It is only exposed for certain advanced operations.
+    """Construct and return the presentation model that will be used while rendering to html/xlsx formats. The returned object has all the information required to render the tables in the requested format. The details of the object is transparent to the caller. It is only exposed for certain advanced operations.
 
     Args:
         df: The dataframe representation of the table. The shape of the dataframe closely resembles the table that will be rendered in the requested format.
@@ -81,110 +88,122 @@ def build_presentation_model(
     """
 
     if bool(data_style_func) and bool(column_style_func):
-        raise ValueError("Only one of data_style_func and column_style_func needs to be set.")
+        raise ValueError(
+            "Only one of data_style_func and column_style_func needs to be set."
+        )
 
     func = _build_presentation_model_for_excel
-    if output_format == 'html':
+    if output_format == "html":
         func = _build_presentation_model_for_html
         engine = None
+        if not (data_style_func or column_style_func):
+            # This is for backwards compatibility
+            data_style_func = HTMLWriterDefaults.data_style_func(df)
 
+    internal_frame = InternalFrame(df)
     return func(
-            df=df,
-            data_value_func=data_value_func,
-            data_style_func=data_style_func,
-            header_style_func=header_style_func,
-            header_value_func=header_value_func,
-            index_style_func=index_style_func,
-            index_value_func=index_value_func,
-            index_name_func=index_name_func,
-            index_name_style_func=index_name_style_func,
-            column_style_func=column_style_func,
-            engine=engine,
-            **kwargs)
+        df=internal_frame,
+        data_value_func=data_value_func,
+        data_style_func=data_style_func,
+        header_style_func=header_style_func,
+        header_value_func=header_value_func,
+        index_style_func=index_style_func,
+        index_value_func=index_value_func,
+        index_name_func=index_name_func,
+        index_name_style_func=index_name_style_func,
+        column_style_func=column_style_func,
+        engine=engine,
+        **kwargs,
+    )
 
 
 def _build_presentation_model_for_excel(
-        *,
-        df,
-        data_value_func,
-        data_style_func=None,
-        header_style_func=None,
-        header_value_func=None,
-        index_style_func=None,
-        index_value_func=None,
-        index_name_func=None,
-        index_name_style_func=None,
-        column_style_func=None,
-        engine='openpyxl', # for backward compatibility
-        **kwargs):
+    *,
+    df,
+    data_value_func,
+    data_style_func=None,
+    header_style_func=None,
+    header_value_func=None,
+    index_style_func=None,
+    index_value_func=None,
+    index_name_func=None,
+    index_name_style_func=None,
+    column_style_func=None,
+    engine="openpyxl",  # for backward compatibility
+    **kwargs,
+):
 
-    if engine == 'xlsxwriter':
+    if engine == "xlsxwriter":
         helper_cls = XlsxWriterStyleHelper
     else:
         helper_cls = OpenPyxlStyleHelper
 
-    data_value_func = data_value_func
     if not (data_style_func or column_style_func):
-        column_style_func = (lambda _: helper_cls.get_style())
-    header_style_func = header_style_func or (lambda x: helper_cls.default_header_style())
+        column_style_func = lambda _: helper_cls.get_style()
+    header_style_func = header_style_func or (
+        lambda x: helper_cls.default_header_style()
+    )
     header_value_func = header_value_func or (lambda x: x.value)
     index_style_func = index_style_func or (lambda x: helper_cls.get_style())
     index_value_func = index_value_func or (lambda x: x.value)
-    index_name_func = index_name_func or (lambda x: x or '')
-    index_name_style_func = index_name_style_func or (lambda x: helper_cls.default_header_style())
+    index_name_func = index_name_func or (lambda x: x or "")
+    index_name_style_func = index_name_style_func or (
+        lambda x: helper_cls.default_header_style()
+    )
 
     return _build_presentation_model(
-            df=df,
-            data_value_func=data_value_func,
-            data_style_func=data_style_func,
-            header_style_func=header_style_func,
-            header_value_func=header_value_func,
-            index_style_func=index_style_func,
-            index_value_func=index_value_func,
-            index_name_func=index_name_func,
-            index_name_style_func=index_name_style_func,
-            column_style_func=column_style_func,
-            **kwargs)
+        df=df,
+        data_value_func=data_value_func,
+        data_style_func=data_style_func,
+        header_style_func=header_style_func,
+        header_value_func=header_value_func,
+        index_style_func=index_style_func,
+        index_value_func=index_value_func,
+        index_name_func=index_name_func,
+        index_name_style_func=index_name_style_func,
+        column_style_func=column_style_func,
+        **kwargs,
+    )
 
 
 def _build_presentation_model_for_html(
-        *,
-        df,
-        data_value_func=None,
-        data_style_func=None,
-        header_style_func=None,
-        header_value_func=None,
-        index_style_func=None,
-        index_value_func=None,
-        index_name_func=None,
-        index_name_style_func=None,
-        column_style_func=None,
-        **kwargs):
-
-    data_value_func = data_value_func
-    if not (data_style_func or column_style_func):
-        # TODO: replace with implementation for column style func
-        data_style_func = HTMLWriterDefaults.data_style_func(df)
+    *,
+    df,
+    data_value_func=None,
+    data_style_func=None,
+    header_style_func=None,
+    header_value_func=None,
+    index_style_func=None,
+    index_value_func=None,
+    index_name_func=None,
+    index_name_style_func=None,
+    column_style_func=None,
+    **kwargs,
+):
 
     header_style_func = header_style_func or HTMLWriterDefaults.header_style_func(df)
     header_value_func = header_value_func or HTMLWriterDefaults.header_value_func(df)
     index_style_func = index_style_func or HTMLWriterDefaults.index_style_func(df)
     index_value_func = index_value_func or HTMLWriterDefaults.index_value_func(df)
     index_name_func = index_name_func or HTMLWriterDefaults.index_name_value_func(df)
-    index_name_style_func = index_name_style_func or HTMLWriterDefaults.index_name_style_func(df)
+    index_name_style_func = (
+        index_name_style_func or HTMLWriterDefaults.index_name_style_func(df)
+    )
 
     return _build_presentation_model(
-            df=df,
-            data_value_func=data_value_func,
-            data_style_func=data_style_func,
-            header_style_func=header_style_func,
-            header_value_func=header_value_func,
-            index_style_func=index_style_func,
-            index_value_func=index_value_func,
-            index_name_func=index_name_func,
-            index_name_style_func=index_name_style_func,
-            column_style_func=column_style_func,
-            **kwargs)
+        df=df,
+        data_value_func=data_value_func,
+        data_style_func=data_style_func,
+        header_style_func=header_style_func,
+        header_value_func=header_value_func,
+        index_style_func=index_style_func,
+        index_value_func=index_value_func,
+        index_name_func=index_name_func,
+        index_name_style_func=index_name_style_func,
+        column_style_func=column_style_func,
+        **kwargs,
+    )
+
 
 def _raise_on_invalid_index(index, label: str):
 
@@ -196,44 +215,49 @@ def _raise_on_invalid_index(index, label: str):
 
     detailed_msg = """\nFor presentation model to process index and columns, the index and columns should be unique. For multi-heirarchical indices, the values should becontiguous at the first level. For example in : \t\n df.columns = pd.MultiIndex.from_tuples([('a', 1), ('a', 2), ('b', 1), ('a', 3)]) \n the first level of values turns out to be ['a', 'a', 'b', 'a']. \n Note that 'a' is not contiguous and therefore the index/column is not a valid value."""
 
+    if not isinstance(index, (pd.MultiIndex, pd.Index)):
+        # probably a static-frame
+        return
+
     if isinstance(index, pd.MultiIndex):
         values = index.tolist()
         values_at_first_level, *_ = zip(*values)
         by_group = tuple((k for k, _ in it.groupby(values_at_first_level)))
         if len(set(values_at_first_level)) != len(by_group):
-            msg = ''.join((
-                label,
-                ' not contiguous at the first level.',
-                detailed_msg,
-                "\n Value Passed: ",
-                str(index)))
+            msg = "".join(
+                (
+                    label,
+                    " not contiguous at the first level.",
+                    detailed_msg,
+                    "\n Value Passed: ",
+                    str(index),
+                )
+            )
             raise ValueError(msg)
         return
 
     # if single hierarchical
     if len(set(index)) != len(index):
-        msg = ''.join((
-            label,
-            ' not unique.',
-            detailed_msg,
-            "\n Value Passed: ",
-            str(index)))
+        msg = "".join(
+            (label, " not unique.", detailed_msg, "\n Value Passed: ", str(index))
+        )
         raise ValueError(msg)
 
 
 def _build_presentation_model(
-        *,
-        df,
-        data_value_func,
-        data_style_func,
-        header_style_func,
-        header_value_func,
-        index_style_func,
-        index_value_func,
-        index_name_func,
-        index_name_style_func,
-        column_style_func=None,
-        **kwargs):
+    *,
+    df,
+    data_value_func,
+    data_style_func,
+    header_style_func,
+    header_value_func,
+    index_style_func,
+    index_value_func,
+    index_name_func,
+    index_name_style_func,
+    column_style_func=None,
+    **kwargs,
+):
     """
     Return a DFView tuple (, ) - what could this end up being?
 
@@ -251,46 +275,46 @@ def _build_presentation_model(
 
     # cleanup kwargs
     kwargs = kwargs or {}
-    kwargs['hide_index'] = kwargs.get('hide_index', False)
-    kwargs['hide_header'] = kwargs.get('hide_header', False)
+    kwargs["hide_index"] = kwargs.get("hide_index", False)
+    kwargs["hide_header"] = kwargs.get("hide_header", False)
     # FIXME: covert method revisit
-    kwargs['use_convert'] = kwargs.get('use_convert', False)
+    kwargs["use_convert"] = kwargs.get("use_convert", False)
 
     # table compositor needs indices/column names to be unique.
-    if not kwargs['hide_index']:
-        _raise_on_invalid_index(df.index, 'index')
-    if not kwargs['hide_header']:
-        _raise_on_invalid_index(df.columns, 'columns')
-
+    if not kwargs["hide_index"]:
+        _raise_on_invalid_index(df.index, "index")
+    if not kwargs["hide_header"]:
+        _raise_on_invalid_index(df.columns, "columns")
 
     column_index_tree = IndexNode.index_to_index_node(df.columns)
-    header_value_view = IndexNode.apply(
-        f=header_value_func,
-        root=column_index_tree)
+    header_value_view = IndexNode.apply(f=header_value_func, root=column_index_tree)
     header_style_view = IndexNode.apply(
         f=lambda node: StyleWrapper(user_style=header_style_func(node)),
-        root=column_index_tree)
+        root=column_index_tree,
+    )
     # index
     style_index_view = IndexNode.apply(
         f=lambda node: StyleWrapper(user_style=index_style_func(node)),
-        root=IndexNode.index_to_index_node(df.index))
+        root=IndexNode.index_to_index_node(df.index),
+    )
     index_value_view = IndexNode.apply(
-        f=index_value_func,
-        root=IndexNode.index_to_index_node(df.index))
+        f=index_value_func, root=IndexNode.index_to_index_node(df.index)
+    )
 
     # process df
     value_view = PresentationLayoutManager.apply(data_value_func, df)
     if column_style_func:
         style_view = PresentationLayoutManager.apply_at_column_level(
-                lambda c: StyleWrapper(user_style=column_style_func(c)), df)
+            lambda c: StyleWrapper(user_style=column_style_func(c)), df
+        )
     else:
         style_view = PresentationLayoutManager.apply(
-                lambda i, c: StyleWrapper(user_style=data_style_func(i, c)), df)
+            lambda i, c: StyleWrapper(user_style=data_style_func(i, c)), df
+        )
 
     # index name style
     index_name_values = index_name_func(df.index.name)
-    index_name_style = StyleWrapper(user_style=index_name_style_func(
-        df.index.name))
+    index_name_style = StyleWrapper(user_style=index_name_style_func(df.index.name))
 
     header = PresentationElements(values=header_value_view, style=header_style_view)
     df_view = PresentationElements(values=value_view, style=style_view)
@@ -302,4 +326,5 @@ def _build_presentation_model(
         index_label=index,
         data=df_view,
         index_name=index_name,
-        kwargs=kwargs)
+        kwargs=kwargs,
+    )

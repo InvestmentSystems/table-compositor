@@ -1,4 +1,3 @@
-
 .. image:: https://travis-ci.org/InvestmentSystems/table-compositor.svg?branch=master
     :target: https://travis-ci.org/InvestmentSystems/table-compositor
 

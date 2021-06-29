@@ -1,14 +1,17 @@
 from collections import namedtuple
-from table_compositor.presentation_model import to_row_col_dict
-from table_compositor.presentation_model import shift_presentation_model
-from table_compositor.presentation_model import get_presentation_model_max_cols
-from table_compositor.presentation_model import get_presentation_model_max_rows
-from table_compositor.presentation_model import PresentationLayoutManager
 
-Cell = namedtuple('Cell', ['vertical', 'children'])
+from table_compositor.presentation_model import (
+    PresentationLayoutManager,
+    get_presentation_model_max_cols,
+    get_presentation_model_max_rows,
+    shift_presentation_model,
+    to_row_col_dict,
+)
+
+Cell = namedtuple("Cell", ["vertical", "children"])
+
 
 class GridLayoutManager:
-
     @staticmethod
     def build_cells(layout, vertical=True):
         children = []
@@ -23,13 +26,11 @@ class GridLayoutManager:
     @staticmethod
     def traverse(cell, f):
         if not isinstance(cell.children, (Cell, list)):
-            return Cell(vertical=cell.vertical,
-                        children=f(cell.children))
+            return Cell(vertical=cell.vertical, children=f(cell.children))
 
         if isinstance(cell.children, Cell):
             r = GridLayoutManager.traverse(cell.children, f)
-            return Cell(vertical=cell.vertical,
-                        children=r)
+            return Cell(vertical=cell.vertical, children=r)
 
         child_values = []
         if isinstance(cell.children, list):
@@ -37,7 +38,6 @@ class GridLayoutManager:
                 r = GridLayoutManager.traverse(child, f)
                 child_values.append(r)
             return Cell(vertical=cell.vertical, children=child_values)
-
 
     @staticmethod
     def foldl(cell, f, accum):
@@ -54,7 +54,9 @@ class GridLayoutManager:
             return accum
 
     @staticmethod
-    def shift_grid(cell, i, j, shifter_func, ht_func, width_func, h_shift_by=1, v_shift_by=1):
+    def shift_grid(
+        cell, i, j, shifter_func, ht_func, width_func, h_shift_by=1, v_shift_by=1
+    ):
         if not isinstance(cell.children, (list, Cell)):
             child = cell.children
             # shifting
@@ -65,17 +67,18 @@ class GridLayoutManager:
 
         if isinstance(cell.children, Cell):
             result = GridLayoutManager.shift_grid(
-                    cell.children,
-                    i,
-                    j,
-                    shifter_func,
-                    ht_func,
-                    width_func,
-                    h_shift_by,
-                    v_shift_by)
+                cell.children,
+                i,
+                j,
+                shifter_func,
+                ht_func,
+                width_func,
+                h_shift_by,
+                v_shift_by,
+            )
 
-            #print(('-----'))
-            #print('result=', result)
+            # print(('-----'))
+            # print('result=', result)
             return result
 
         child_values = []
@@ -83,15 +86,15 @@ class GridLayoutManager:
         new_max_row, new_max_col = 0, 0
         for child in cell.children:
             (max_row, max_col), new_c = GridLayoutManager.shift_grid(
-                    child,
-                    row,
-                    col,
-                    shifter_func,
-                    ht_func,
-                    width_func,
-                    h_shift_by,
-                    v_shift_by)
-
+                child,
+                row,
+                col,
+                shifter_func,
+                ht_func,
+                width_func,
+                h_shift_by,
+                v_shift_by,
+            )
 
             child_values.append(new_c)
             if cell.vertical:
@@ -103,49 +106,50 @@ class GridLayoutManager:
                 new_max_col = new_max_col + max_col
                 new_max_row = max(new_max_row, max_row)
 
-        #print('returning...', (new_max_row, new_max_col), child_values)
-        #print('Done shift grid')
-        return ((new_max_row, new_max_col),
-                Cell(vertical=cell.vertical, children=child_values))
-
+        # print('returning...', (new_max_row, new_max_col), child_values)
+        # print('Done shift grid')
+        return (
+            (new_max_row, new_max_col),
+            Cell(vertical=cell.vertical, children=child_values),
+        )
 
     @staticmethod
-    def get_row_col_dict(layout, orientation='vertical', h_shift_by=1, v_shift_by=1):
-        '''
+    def get_row_col_dict(layout, orientation="vertical", h_shift_by=1, v_shift_by=1):
+        """
         Transform the grid into a dict of {coord: value_and_style_attribute value}
-        '''
+        """
 
         grid = GridLayoutManager.compute_grid(layout, orientation)
         _, shifted_grid = GridLayoutManager.shift_grid(
-                cell=grid,
-                i=0,
-                j=0,
-                shifter_func=shift_presentation_model,
-                ht_func=get_presentation_model_max_rows,
-                width_func=get_presentation_model_max_cols,
-                h_shift_by=h_shift_by,
-                v_shift_by=v_shift_by)
+            cell=grid,
+            i=0,
+            j=0,
+            shifter_func=shift_presentation_model,
+            ht_func=get_presentation_model_max_rows,
+            width_func=get_presentation_model_max_cols,
+            h_shift_by=h_shift_by,
+            v_shift_by=v_shift_by,
+        )
 
         f = lambda accum, pm: {**accum, **to_row_col_dict(pm)}
         return GridLayoutManager.foldl(shifted_grid, f, dict())
 
-
     @staticmethod
-    def compute_grid(layout, orientation='vertical'):
-        '''
+    def compute_grid(layout, orientation="vertical"):
+        """
         Transform the grid into a dict of {coord: value_and_style_attribute value}
-        '''
+        """
 
-        vertical = orientation.upper() == 'VERTICAL'
+        vertical = orientation.upper() == "VERTICAL"
         grid = GridLayoutManager.build_cells(layout, vertical)
         grid = GridLayoutManager.traverse(grid, PresentationLayoutManager.resolve_loc)
         return grid
 
     @staticmethod
-    def get_non_shifted_row_col_dict(layout, orientation='vertical'):
-        '''
+    def get_non_shifted_row_col_dict(layout, orientation="vertical"):
+        """
         Transform the grid into a dict of {coord: value_and_style_attribute value}
-        '''
+        """
 
         grid = GridLayoutManager.compute_grid(layout, orientation)
         return GridLayoutManager.traverse(grid, to_row_col_dict)
