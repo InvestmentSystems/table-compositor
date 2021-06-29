@@ -5,6 +5,7 @@ from setuptools import setup
 # To use a consistent encoding
 from codecs import open
 from os import path
+import typing as tp
 
 # https://packaging.python.org/distributing/
 # to deploy:
@@ -15,7 +16,17 @@ from os import path
 # twine register dist/<tar file>
 # twine upload dist/*
 
-here = path.abspath(path.dirname(__file__))
+ROOT_DIR_FP = path.abspath(path.dirname(__file__))
+
+def _get_requirements(file_name: str) -> tp.Iterator[str]:
+    with open(path.join(ROOT_DIR_FP, file_name)) as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                yield line
+
+def get_install_requires() -> tp.Iterator[str]:
+    yield from _get_requirements('requirements.txt')
 
 def get_long_description():
     return '''
@@ -36,7 +47,7 @@ setup(
     description='Library to render table-like data structure into XLSX and other formats.',
     long_description=get_long_description(),
 
-    install_requires=['pandas', 'openpyxl'],
+    install_requires=list(get_install_requires()),
 
     url='https://github.com/InvestmentSystems/table-compositor',
     author='Guru Devanla',
