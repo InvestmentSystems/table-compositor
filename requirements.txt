@@ -1,7 +1,7 @@
 pandas==0.24.2
 numpy==1.17.4
 openpyxl>=2.5.4
-xlsxwriter>=1.1.5
+xlsxwriter>=1.1.2
 Pygments>=2.9.0
 sphinx-jinja>=1.1.1
 sphinxcontrib-napoleon>=0.7
