@@ -10,17 +10,12 @@ and also create Excel files with all fancy formatting.
 # e. Revisit _convert method
 
 
-from collections import (
-    defaultdict,
-    deque,
-    namedtuple,
-)
+from collections import defaultdict, deque, namedtuple
 from itertools import groupby
 
+import numpy as np
 import pandas as pd
 import static_frame as sf
-
-import numpy as np
 
 StyleWrapper = namedtuple("StyleWrapper", ["user_style"])
 
@@ -51,7 +46,12 @@ class InternalFrame:
         self.columns = InternalIndex(self._frame.columns)
 
     def copy(self):
-        return self._frame.copy()
+        if hasattr(self._frame, "copy"):
+            return self._frame.copy()
+        # for SF we get this for free
+        if isinstance(self._frame, sf.FrameGO):
+            return self._frame.to_frame()
+        return self._frame
 
 
 class InternalIndex:
@@ -204,10 +204,10 @@ class PresentationLayoutManager:
         # we short circuit this if no changes are required
         # this is useful for value_func where values rarely change
         if f is None:
-            if hasattr(
-                df, "copy"
-            ):  # we only need the copy operation for dataframe. For SF we get that for free!
+            # we only need the copy operation for dataframe. For SF we get that for free!
+            if hasattr(df, "copy"):
                 return df.copy()
+            return df
 
         df_new = pd.DataFrame(index=df.index._index, columns=df.columns._index)
         index_length = len(df_new.index)
