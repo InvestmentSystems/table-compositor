@@ -7,13 +7,13 @@ from table_compositor.util import df_type_to_str
 
 
 class td_style(tp.NamedTuple):
-    text_align: tp.Any
-    background_color: tp.Any
-    color: tp.Any
-    border: tp.Any
-    font_weight: tp.Any
-    white_space: tp.Any
-    padding: tp.Any
+    text_align: str
+    background_color: str
+    color: str
+    border: tp.Optional[int]
+    font_weight: str
+    white_space: str
+    padding: str
 
 
 def td_style_to_str(td_style_):

@@ -1,7 +1,11 @@
 import typing as tp
 
 from table_compositor.presentation_model import (
+    LocOffsets,
+    PresentationAndLoc,
     PresentationLayoutManager,
+    PresentationModel,
+    ValueAndStyleAttributes,
     get_presentation_model_max_cols,
     get_presentation_model_max_rows,
     shift_presentation_model,
@@ -10,8 +14,14 @@ from table_compositor.presentation_model import (
 
 
 class Cell(tp.NamedTuple):
-    vertical: tp.Any
-    children: tp.Any
+    vertical: bool
+    children: tp.Union[
+        "Cell",
+        tp.List["Cell"],
+        tp.Dict[LocOffsets, ValueAndStyleAttributes],
+        PresentationAndLoc,
+        PresentationModel,
+    ]
 
 
 class GridLayoutManager:
