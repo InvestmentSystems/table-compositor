@@ -6,7 +6,7 @@ import numpy as np
 
 import table_compositor.html_writer as htmlw
 from table_compositor.presentation_model import PresentationModel
-from table_compositor.test.unit_test.fixtures import (
+from table_compositor.test.unit_test.conftest import (
     Fixture,
     LayoutT,
     get_scenarios,

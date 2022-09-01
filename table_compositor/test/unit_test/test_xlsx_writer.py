@@ -4,7 +4,7 @@ import unittest
 
 from openpyxl import load_workbook
 
-from table_compositor.test.unit_test.fixtures import (
+from table_compositor.test.unit_test.conftest import (
     Fixture,
     LayoutT,
     get_scenarios,
