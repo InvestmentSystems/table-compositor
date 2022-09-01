@@ -5,19 +5,20 @@ in that environment. This helps the imports find the modules in the right place
 """
 
 
-# start_imports
-import tempfile
-import zipfile
 import collections
 import os
+
+# start_imports
+import tempfile
 import webbrowser
+import zipfile
 
-import requests
 import pandas as pd
+import requests
 
-import table_compositor.table_compositor as tc
-import table_compositor.html_writer as htmlw
 import table_compositor.html_styles as html_style
+import table_compositor.html_writer as htmlw
+import table_compositor.table_compositor as tc
 
 # end_imports
 

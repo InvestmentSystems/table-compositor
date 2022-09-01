@@ -4,19 +4,20 @@ module, install table_compositor in an separate  environment and then run this m
 in that environment. This helps the imports find the modules in the right place
 """
 
-# start_imports
-import tempfile
-import zipfile
 import collections
 import os
-import webbrowser
 
-import requests
+# start_imports
+import tempfile
+import webbrowser
+import zipfile
+
 import pandas as pd
+import requests
 
 import table_compositor.table_compositor as tc
-import table_compositor.xlsx_writer as xlsxw
 import table_compositor.xlsx_styles as xlsstyle
+import table_compositor.xlsx_writer as xlsxw
 
 # end_imports
 

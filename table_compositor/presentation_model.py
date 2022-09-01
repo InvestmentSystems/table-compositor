@@ -9,34 +9,59 @@ and also create Excel files with all fancy formatting.
 # c. HTML Writer (non-nested, and then nested tables)
 # e. Revisit _convert method
 
-
-from collections import defaultdict, deque, namedtuple
+import typing as tp
+from collections import (
+    defaultdict,
+    deque,
+)
 from itertools import groupby
 
 import numpy as np
 import pandas as pd
 import static_frame as sf
 
-StyleWrapper = namedtuple("StyleWrapper", ["user_style"])
+class StyleWrapper(tp.NamedTuple):
+    user_style: tp.Any
 
-PresentationAndLoc = namedtuple("PresentationAndLoc", ["model", "locs"])
-Locs = namedtuple(
-    "Locs", ["header_loc", "index_loc", "data_loc", "index_name_loc", "nesting_level"]
-)
 
-PresentationElements = namedtuple("PresentationElements", ["values", "style"])
+class PresentationAndLoc(tp.NamedTuple):
+    model: tp.Any
+    locs: tp.Any
+
+
+class Locs(tp.NamedTuple):
+    header_loc: tp.Any
+    index_loc: tp.Any
+    data_loc: tp.Any
+    index_name_loc: tp.Any
+    nesting_level: tp.Any
+
+class PresentationElements(tp.NamedTuple):
+    values: tp.Any
+    style: tp.Any
+
 
 # The header, index_label, data and index_name attributes in the presentation
 # model will be of type PresentationElements
-PresentationModel = namedtuple(
-    "PresentationModel", ["header", "index_label", "data", "index_name", "kwargs"]
-)
+class PresentationModel(tp.NamedTuple):
+    header: tp.Any
+    index_label: tp.Any
+    data: tp.Any
+    index_name: tp.Any
+    kwargs: tp.Any
 
-LocOffsets = namedtuple("LocOffsets", ["start_row", "start_col", "end_row", "end_col"])
 
-ValueAndStyleAttributes = namedtuple(
-    "ValueAndStyleAttributes", ["value", "style_wrapper", "nesting_level"]
-)
+class LocOffsets(tp.NamedTuple):
+    start_row: tp.Any
+    start_col: tp.Any
+    end_row: tp.Any
+    end_col: tp.Any
+
+
+class ValueAndStyleAttributes(tp.NamedTuple):
+    value: tp.Any
+    style_wrapper: tp.Any
+    nesting_level: tp.Any
 
 
 class InternalFrame:
@@ -666,7 +691,6 @@ class IndexNode:
         previous_level = 1
 
         def _resolve_loc(node):
-            # import ipdb; ipdb.set_trace()
             nonlocal current_offsets
             nonlocal previous_level
             level = len(IndexNode.index(node))

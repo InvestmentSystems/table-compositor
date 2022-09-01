@@ -1,15 +1,63 @@
 import os
-import unittest
 import typing as tp
-from functools import partial
+import unittest
+
+import numpy as np
 
 import table_compositor.html_writer as htmlw
 from table_compositor.presentation_model import PresentationModel
-from table_compositor.test.unit_test import fixtures
-from table_compositor.xlsx_writer import OpenPyxlCompositor
-
+from table_compositor.test.unit_test.fixtures import (
+    Fixture,
+    LayoutT,
+    get_scenarios,
+)
+from table_compositor.util import df_type_to_str
 
 LayoutT = tp.List[tp.Union[PresentationModel, tp.List[PresentationModel]]]
+
+
+class HtmlCallBackFunc:
+    def __init__(self, df):
+        self.df = df
+
+    @staticmethod
+    def _to_dollar_format(v):
+        if not isinstance(v, (np.float, np.int)):
+            return v
+        r = "${:0,.0f}".format(v)
+        return r
+
+    def data_value_func(self, r, c):
+        return df_type_to_str(self.df.loc[r, c])
+
+    def data_style_func(self, r, c):
+        if isinstance(self.df.loc[r, c], (np.int_, np.float, np.uint)):
+            return dict(text_align="right", padding="10px")
+        return dict(text_align="left", padding="10px")
+
+    def header_value_func(self, node):
+        return node.value
+
+    def header_style_func(self, node):
+        return dict(
+            text_align="center",
+            background_color="#4F81BD",
+        )
+
+    def index_value_func(self, node):
+        return node.value
+
+    def index_style_func(self, node):
+        return dict(
+            text_align="center",
+            background_color="#4F81BD",
+        )
+
+    def index_name_style_func(self, node):
+        return dict(text_align="left", padding="10px")
+
+    def index_name_value_func(self, value):
+        return value
 
 
 def get_expected_output_folder(fname: str) -> str:
@@ -20,21 +68,20 @@ def get_expected_output_folder(fname: str) -> str:
 
 
 class TestUnit(unittest.TestCase):
-    def _test_helper(
-        self,
-        name: str,
-        func_to_call: tp.Callable[[], LayoutT],
-        engine: tp.Type[OpenPyxlCompositor],
-        *args: str
-    ) -> None:
-        layout: LayoutT = func_to_call()
-
-        assert all(isinstance(x, str) for x in args)
+    def _test_helper(self, fixture: Fixture) -> None:
+        layout: LayoutT = fixture.fixture_func(
+            grid=fixture.grid,
+            nested=fixture.nested,
+            callback_func_cls=HtmlCallBackFunc,
+        )
 
         # we drop the engine name from the test, since the expected file is the same for both engines
-        fname = name.replace("_" + engine.__name__, "") + ".html"
+        fname = fixture.name.replace("_" + fixture.engine.__name__, "") + ".html"
 
-        actual_html_str = htmlw.HTMLWriter.to_html(layout, *args, border=1)
+        actual_html_str = htmlw.HTMLWriter.to_html(
+            layout, orientation=fixture.orientation, border=1
+        )
+
         # drop the libray name since expected file is the same
         expected_fname = fname.replace("_static_frame", "").replace("_pandas", "")
         expected_fp = get_expected_output_folder(expected_fname)
@@ -44,20 +91,8 @@ class TestUnit(unittest.TestCase):
             self.assertEqual(expected_str, actual_html_str)
 
     def test_html_writer(self) -> None:
-        scenarios = fixtures.get_scenarios()
-
-        for s in scenarios:
-            self._test_helper(
-                s.name,
-                partial(
-                    s.fixture_func,
-                    grid=s.grid,
-                    nested=s.nested,
-                    callback_func_cls=fixtures.HtmlCallBackFunc,
-                ),
-                s.engine_and_callback_funcs_cls[0],
-                s.orientation,
-            )
+        for fixture in get_scenarios():
+            self._test_helper(fixture)
 
 
 if __name__ == "__main__":

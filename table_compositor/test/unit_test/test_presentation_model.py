@@ -1,6 +1,6 @@
 import unittest
-
 import warnings
+
 import pandas as pd
 
 import table_compositor.presentation_model as ptm

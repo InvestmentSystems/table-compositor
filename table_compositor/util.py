@@ -1,8 +1,7 @@
 import numbers
 
-import pandas as pd
-
 import numpy as np
+import pandas as pd
 
 
 def df_type_to_str(i):

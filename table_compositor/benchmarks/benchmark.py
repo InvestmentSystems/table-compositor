@@ -7,11 +7,11 @@ import tempfile
 import time
 import typing as tp
 
+import numpy as np
 import pandas as pd
 
 import table_compositor.table_compositor as tbc
 import table_compositor.xlsx_writer as tcew
-import numpy as np
 from table_compositor.xlsx_styles import (
     OpenPyxlStyleHelper,
     XlsxWriterStyleHelper,
@@ -112,8 +112,8 @@ def prepare_dataframe(n_rows, n_cols):
     return df
 
 
-def _create_presentation_model(df, callback_funcs_cls, slow=0):
-    call_back_func_inst = callback_funcs_cls(df)
+def _create_presentation_model(df, callback_func_cls, slow=0):
+    call_back_func_inst = callback_func_cls(df)
     if slow == 0:
         presentation_model = tbc.build_presentation_model(
             df=df,

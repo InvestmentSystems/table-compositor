@@ -1,4 +1,4 @@
-from collections import namedtuple
+import typing as tp
 
 from table_compositor.presentation_model import (
     PresentationLayoutManager,
@@ -8,7 +8,9 @@ from table_compositor.presentation_model import (
     to_row_col_dict,
 )
 
-Cell = namedtuple("Cell", ["vertical", "children"])
+class Cell(tp.NamedTuple):
+    vertical: tp.Any
+    children: tp.Any
 
 
 class GridLayoutManager:

@@ -1,12 +1,12 @@
-from collections import namedtuple
+import typing as tp
+import warnings
+from dbm.ndbm import library
 from itertools import product
 
-import warnings
 import pandas as pd
 
 import table_compositor.table_compositor as tbc
-import numpy as np
-from table_compositor.util import df_type_to_str
+from table_compositor.presentation_model import PresentationModel
 from table_compositor.xlsx_styles import (
     OpenPyxlStyleHelper,
     XlsxWriterStyleHelper,
@@ -14,56 +14,42 @@ from table_compositor.xlsx_styles import (
 from table_compositor.xlsx_writer import (
     OpenPyxlCompositor,
     XlsxWriterCompositor,
+    _XLSXCompositor,
 )
 
-TestFixtures = namedtuple(
-    "TestFixtures",
-    (
-        "name",
-        "fixture_func",
-        "grid",
-        "nested",
-        "orientation",
-        "frame_library",
-        "engine_and_callback_funcs_cls",
-    ),
-)
+LayoutT = tp.Union[PresentationModel, tp.List[PresentationModel]]
 
 
-def get_scenarios():
+@tp.runtime_checkable
+class CallBackFuncInterface(tp.Protocol):
+    df: pd.DataFrame
 
-    fixture_funcs = (get_simple_df_with_layout, get_multi_hierarchical_df_with_layouts)
-    permutations = product(
-        fixture_funcs,  # fixture function to get layout
-        (True, False),  # grid arg for filter func
-        (True, False),  # nested arg for filter func
-        ("horizontal", "vertical"),  # horizontal or vertical orientation
-        ("pandas", "static_frame"),
-        (
-            (OpenPyxlCompositor, XlsxCallBackFunc),
-            (XlsxWriterCompositor, XlsxCallBackFuncXlsxWriter),
-        ),
-    )
+    def data_value_func(self, i, c):
+        pass
 
-    fixtures = []
-    for p in permutations:
-        fixture_name = "test_{}_grid_{}_nested_{}_orientation_{}_{}_{}".format(
-            p[0].__name__, *p[1:-1], p[-1][0].__name__
-        )
-        fixture = TestFixtures(
-            name=fixture_name,
-            fixture_func=p[0],
-            grid=p[1],
-            nested=p[2],
-            orientation=p[3],
-            frame_library=p[4],
-            engine_and_callback_funcs_cls=p[5],
-        )
-        fixtures.append(fixture)
-    return fixtures
+    def data_style_func(self, i, c):
+        pass
+
+    def header_style_func(self, node):
+        pass
+
+    def header_value_func(self, node):
+        pass
+
+    def index_value_func(self, node):
+        pass
+
+    def index_style_func(self, node):
+        pass
+
+    def index_name_style_func(self, node):
+        pass
+
+    def index_name_value_func(self, value):
+        pass
 
 
-class XlsxCallBackFunc:
+class XlsxCallBackFunc(CallBackFuncInterface):
     def __init__(self, df):
         self.df = df
 
@@ -128,7 +114,7 @@ class XlsxCallBackFunc:
         return value
 
 
-class XlsxCallBackFuncXlsxWriter:
+class XlsxCallBackFuncXlsxWriter(CallBackFuncInterface):
     def __init__(self, df):
         self.df = df
 
@@ -179,53 +165,13 @@ class XlsxCallBackFuncXlsxWriter:
         return value
 
 
-class HtmlCallBackFunc:
-    def __init__(self, df):
-        self.df = df
-
-    @staticmethod
-    def _to_dollar_format(v):
-        if not isinstance(v, (np.float, np.int)):
-            return v
-        r = "${:0,.0f}".format(v)
-        return r
-
-    def data_value_func(self, r, c):
-        return df_type_to_str(self.df.loc[r, c])
-
-    def data_style_func(self, r, c):
-        if isinstance(self.df.loc[r, c], (np.int_, np.float, np.uint)):
-            return dict(text_align="right", padding="10px")
-        return dict(text_align="left", padding="10px")
-
-    def header_value_func(self, node):
-        return node.value
-
-    def header_style_func(self, node):
-        return dict(
-            text_align="center",
-            background_color="#4F81BD",
-        )
-
-    def index_value_func(self, node):
-        return node.value
-
-    def index_style_func(self, node):
-        return dict(
-            text_align="center",
-            background_color="#4F81BD",
-        )
-
-    def index_name_style_func(self, node):
-        return dict(text_align="left", padding="10px")
-
-    def index_name_value_func(self, value):
-        return value
-
-
 def get_simple_df_with_layout(
-    grid=False, nested=False, callback_func_cls=XlsxCallBackFunc, frame_library="pandas"
-):
+    *,
+    grid: bool = False,
+    nested: bool = False,
+    callback_func_cls: tp.Type[CallBackFuncInterface] = XlsxCallBackFunc,
+    frame_library: str = "pandas",
+) -> tp.List[PresentationModel]:
 
     data = dict(a=[0.1, 0.2, 0.3], b=[100, 200, -300], c=[True, False, True])
     df = pd.DataFrame(data=data, index=[100, 200, 300])
@@ -258,7 +204,6 @@ def get_simple_df_with_layout(
         # inner_df.index = [1, 2, 3]
         inner_df.index.name = "inner_df"
     else:
-        # import ipdb; ipdb.set_trace()
         # inner_df = df.assign.loc[400](1,2,3)
         data = dict(
             a=[0.1, 0.2, 0.3, 1], b=[100, 200, -300, 2], c=[True, False, True, 3]
@@ -292,12 +237,18 @@ def get_simple_df_with_layout(
 
 
 def get_multi_hierarchical_df_with_layouts(
-    grid=True, nested=False, callback_func_cls=XlsxCallBackFunc, frame_library="pandas"
-):
+    *,
+    grid=True,
+    nested=False,
+    callback_func_cls: tp.Type[CallBackFuncInterface] = XlsxCallBackFunc,
+    frame_library: str = "pandas",
+) -> PresentationModel:
 
     df = pd.DataFrame(
         data=dict(
-            a=[0.1, 0.2, 0.3, 0.4], b=[100, 200, 300, 100], c=[True, False, True, False]
+            a=[0.1, 0.2, 0.3, 0.4],
+            b=[100, 200, 300, 100],
+            c=[True, False, True, False],
         )
     )
     df.index = pd.MultiIndex.from_tuples([("a", 1), ("a", 2), ("b", 1), ("b", 2)])
@@ -360,3 +311,67 @@ def get_multi_hierarchical_df_with_layouts(
         layout = [layout_model]
 
     return layout
+
+
+class FixtureFunc(tp.Protocol):
+    def __call__(
+        self,
+        *,
+        grid=True,
+        nested=False,
+        callback_func_cls: tp.Type[CallBackFuncInterface] = XlsxCallBackFunc,
+        frame_library: str = "pandas",
+    ) -> LayoutT:
+        pass
+
+
+class Fixture(tp.NamedTuple):
+    name: str
+    fixture_func: FixtureFunc
+    grid: bool
+    nested: bool
+    orientation: str
+    frame_library: str
+    engine: tp.Type[_XLSXCompositor]
+    callback_func_cls: tp.Type[CallBackFuncInterface]
+
+
+def get_scenarios() -> tp.List[Fixture]:
+
+    fixture_funcs = (get_simple_df_with_layout, get_multi_hierarchical_df_with_layouts)
+    permutations = product(
+        fixture_funcs,  # fixture function to get layout
+        (True, False),  # grid arg for filter func
+        (True, False),  # nested arg for filter func
+        ("horizontal", "vertical"),  # horizontal or vertical orientation
+        ("pandas", "static_frame"),
+        (
+            (OpenPyxlCompositor, XlsxCallBackFunc),
+            (XlsxWriterCompositor, XlsxCallBackFuncXlsxWriter),
+        ),
+    )
+
+    fixtures = []
+    for (
+        func,
+        grid,
+        nested,
+        orientation,
+        frame_library,
+        (engine, callback_func_cls),
+    ) in permutations:
+        fixture_name = f"test_{func.__name__}_grid_{grid}_nested_{nested}_orientation_{orientation}_{frame_library}_{engine.__name__}"
+
+        fixture = Fixture(
+            name=fixture_name,
+            fixture_func=func,
+            grid=grid,
+            nested=nested,
+            orientation=orientation,
+            frame_library=frame_library,
+            engine=engine,
+            callback_func_cls=callback_func_cls,
+        )
+        fixtures.append(fixture)
+
+    return fixtures

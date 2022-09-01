@@ -1,21 +1,18 @@
-from collections import namedtuple
+import typing as tp
 
 import numpy as np
+
 from table_compositor.html_writer import HTMLWriter
 from table_compositor.util import df_type_to_str
 
-td_style = namedtuple(
-    "td_style",
-    [
-        "text_align",
-        "background_color",
-        "color",
-        "border",
-        "font_weight",
-        "white_space",
-        "padding",
-    ],
-)
+class td_style(tp.NamedTuple):
+    text_align: tp.Any
+    background_color: tp.Any
+    color: tp.Any
+    border: tp.Any
+    font_weight: tp.Any
+    white_space: tp.Any
+    padding: tp.Any
 
 
 def td_style_to_str(td_style_):

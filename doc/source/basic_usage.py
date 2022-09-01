@@ -1,13 +1,15 @@
 # start_imports
 import os
 import tempfile
+
 import pandas as pd
+
 from table_compositor.table_compositor import build_presentation_model
+from table_compositor.xlsx_styles import OpenPyxlStyleHelper
 
 # There are equivalent classes for using xlsxwriter library. Namely,
 # XlsxWriterCompositor and XlsxWriterStyleHelper
 from table_compositor.xlsx_writer import OpenPyxlCompositor
-from table_compositor.xlsx_styles import OpenPyxlStyleHelper
 
 # end_imports
 
