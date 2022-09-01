@@ -5,7 +5,7 @@ from functools import partial
 
 from openpyxl import load_workbook
 
-import table_compositor.test.unit_test.table_compositor_fixtures as tcfx
+from table_compositor.test.unit_test import fixtures
 
 
 def get_expected_output_folder(fname):
@@ -15,61 +15,8 @@ def get_expected_output_folder(fname):
     return expected_fp
 
 
-class TestXlsxWriterMeta(type):
-    def __new__(cls, names, bases, attrs):
-        def test_func_constructor(name, func_to_call, engine, orientation):
-            def _func(self):
-                layout = func_to_call()
-                # we drop the engine name from the test, since the expected file is the same for both engines
-                fname = name.replace("_" + engine.__name__, "") + ".xlsx"
-
-                # this is a quick hack to have the same expected fp for for pandas and static_frame
-                expected_fname = fname.replace("_static_frame", "").replace(
-                    "_pandas", ""
-                )
-                with tempfile.TemporaryDirectory(
-                    suffix="table_compositor"
-                ) as root_temp_dir:
-                    temp_dir = tempfile.mkdtemp(dir=root_temp_dir)
-                    output_fp = os.path.join(temp_dir, fname)
-                    engine.to_xlsx(
-                        layout=layout, output_fp=output_fp, orientation=orientation
-                    )
-                    expected_fp = get_expected_output_folder(expected_fname)
-                    # use this to create the initial expected output
-                    # import shutil
-                    # shutil.copyfile(output_fp, expected_fp)
-                    self.compare(expected_fp, output_fp)
-
-            return _func
-
-        scenarios = tcfx.get_scenarios()
-
-        for s in scenarios:
-            func_to_call = partial(
-                s.fixture_func,
-                grid=s.grid,
-                nested=s.nested,
-                callback_func_cls=s.engine_and_callback_funcs_cls[1],
-                frame_library=s.frame_library,
-            )
-
-            attrs[s.name] = test_func_constructor(
-                s.name,
-                func_to_call,
-                s.engine_and_callback_funcs_cls[0],
-                s.orientation,
-            )
-
-        return type.__new__(cls, names, bases, attrs)
-
-
-class TestUnit(unittest.TestCase, metaclass=TestXlsxWriterMeta):
-    """
-    All tests will be produced by the meta class
-    """
-
-    def compare(self, expected_fp, output_fp):
+class TestUnit(unittest.TestCase):
+    def _compare(self, expected_fp, output_fp):
 
         ews = load_workbook(expected_fp).active
         ows = load_workbook(output_fp).active
@@ -91,10 +38,41 @@ class TestUnit(unittest.TestCase, metaclass=TestXlsxWriterMeta):
 
                 self.assertEqual(e_cell.border.left.style, o_cell.border.left.style)
 
+    def _test_helper(self, func_to_call, name, engine, orientation):
+        layout = func_to_call()
+        # we drop the engine name from the test, since the expected file is the same for both engines
+        fname = name.replace("_" + engine.__name__, "") + ".xlsx"
+
+        # this is a quick hack to have the same expected fp for for pandas and static_frame
+        expected_fname = fname.replace("_static_frame", "").replace("_pandas", "")
+        with tempfile.TemporaryDirectory(suffix="table_compositor") as root_temp_dir:
+            temp_dir = tempfile.mkdtemp(dir=root_temp_dir)
+            output_fp = os.path.join(temp_dir, fname)
+            engine.to_xlsx(layout=layout, output_fp=output_fp, orientation=orientation)
+            expected_fp = get_expected_output_folder(expected_fname)
+            # use this to create the initial expected output
+            # shutil.copyfile(output_fp, expected_fp)
+            self._compare(expected_fp, output_fp)
+
+    def test_xlsx_writer(self):
+        scenarios = fixtures.get_scenarios()
+
+        for s in scenarios:
+            func_to_call = partial(
+                s.fixture_func,
+                grid=s.grid,
+                nested=s.nested,
+                callback_func_cls=s.engine_and_callback_funcs_cls[1],
+                frame_library=s.frame_library,
+            )
+
+            self._test_helper(
+                func_to_call,
+                s.name,
+                s.engine_and_callback_funcs_cls[0],
+                s.orientation,
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
-    # t = TestUnit()
-
-    # t.test_get_multi_hierarchical_df_with_layouts_grid_True_nested_True_orientation_vertical()
-    # t.test_get_multi_hierarchical_df_with_layouts_grid_True_nested_True_orientation_horizontal

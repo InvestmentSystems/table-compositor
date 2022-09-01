@@ -2,6 +2,7 @@
 
 # Always prefer setuptools over distutils
 import typing as tp
+
 # To use a consistent encoding
 from codecs import open
 from os import path
