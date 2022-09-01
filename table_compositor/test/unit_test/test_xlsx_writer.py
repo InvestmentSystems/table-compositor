@@ -1,11 +1,12 @@
+from pytest import mark
 import os
+import shutil
 import tempfile
-import unittest
 
 from openpyxl import load_workbook
 
 from table_compositor.test.unit_test.conftest import (
-    Fixture,
+    Scenario,
     LayoutT,
     get_scenarios,
 )
@@ -18,57 +19,48 @@ def get_expected_output_folder(fname: str) -> str:
     return expected_fp
 
 
-class TestUnit(unittest.TestCase):
-    def _compare(self, expected_fp, output_fp):
+def _revalidate(expected_fp: str, output_fp: str) -> None:
+    # use this to create the initial expected output
+    shutil.copyfile(output_fp, expected_fp)
 
-        ews = load_workbook(expected_fp).active
-        ows = load_workbook(output_fp).active
 
-        for i in range(1, ews.max_row):
-            for j in range(1, ews.max_column):
+def _compare(expected_fp: str, output_fp: str) -> None:
 
-                e_cell = ews.cell(row=i, column=j)
-                o_cell = ows.cell(row=i, column=j)
+    ews = load_workbook(expected_fp).active
+    ows = load_workbook(output_fp).active
 
-                self.assertEqual(e_cell.value, o_cell.value)
+    for i in range(1, ews.max_row):
+        for j in range(1, ews.max_column):
 
-                self.assertEqual(e_cell.number_format, o_cell.number_format)
+            e_cell = ews.cell(row=i, column=j)
+            o_cell = ows.cell(row=i, column=j)
 
-                # this test not compatible between openpyxl and xlsxwriter
-                # self.assertEqual(
-                #     e_cell.fill.fgColor.rgb,
-                #     o_cell.fill.fgColor.rgb)
+            assert e_cell.value == o_cell.value
+            assert e_cell.number_format == o_cell.number_format
+            assert e_cell.border.left.style == o_cell.border.left.style
 
-                self.assertEqual(e_cell.border.left.style, o_cell.border.left.style)
 
-    def _test_helper(self, fixture: Fixture) -> None:
-        layout: LayoutT = fixture.fixture_func(
-            grid=fixture.grid,
-            nested=fixture.nested,
-            callback_func_cls=fixture.callback_func_cls,
-            frame_library=fixture.frame_library,
+@mark.parametrize("scenario", get_scenarios())
+def test_xlsx_writer(scenario: Scenario) -> None:
+    layout: LayoutT = scenario.func(
+        grid=scenario.grid,
+        nested=scenario.nested,
+        callback_func_cls=scenario.callback_func_cls,
+        frame_library=scenario.frame_library,
+    )
+
+    # we drop the engine name from the test, since the expected file is the same for both engines
+    fname = scenario.name.replace("_" + scenario.engine.__name__, "") + ".xlsx"
+
+    # this is a quick hack to have the same expected fp for for pandas and static_frame
+    expected_fname = fname.replace("_static_frame", "").replace("_pandas", "")
+
+    with tempfile.TemporaryDirectory(suffix="table_compositor") as root_temp_dir:
+        temp_dir = tempfile.mkdtemp(dir=root_temp_dir)
+        output_fp = os.path.join(temp_dir, fname)
+        scenario.engine.to_xlsx(
+            layout=layout, output_fp=output_fp, orientation=scenario.orientation
         )
+        expected_fp = get_expected_output_folder(expected_fname)
 
-        # we drop the engine name from the test, since the expected file is the same for both engines
-        fname = fixture.name.replace("_" + fixture.engine.__name__, "") + ".xlsx"
-
-        # this is a quick hack to have the same expected fp for for pandas and static_frame
-        expected_fname = fname.replace("_static_frame", "").replace("_pandas", "")
-        with tempfile.TemporaryDirectory(suffix="table_compositor") as root_temp_dir:
-            temp_dir = tempfile.mkdtemp(dir=root_temp_dir)
-            output_fp = os.path.join(temp_dir, fname)
-            fixture.engine.to_xlsx(
-                layout=layout, output_fp=output_fp, orientation=fixture.orientation
-            )
-            expected_fp = get_expected_output_folder(expected_fname)
-            # use this to create the initial expected output
-            # shutil.copyfile(output_fp, expected_fp)
-            self._compare(expected_fp, output_fp)
-
-    def test_xlsx_writer(self) -> None:
-        for fixture in get_scenarios():
-            self._test_helper(fixture)
-
-
-if __name__ == "__main__":
-    unittest.main()
+        _compare(expected_fp, output_fp)

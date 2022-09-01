@@ -8,6 +8,7 @@ from table_compositor.presentation_model import (
     to_row_col_dict,
 )
 
+
 class Cell(tp.NamedTuple):
     vertical: tp.Any
     children: tp.Any

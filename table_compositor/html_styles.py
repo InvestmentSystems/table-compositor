@@ -5,6 +5,7 @@ import numpy as np
 from table_compositor.html_writer import HTMLWriter
 from table_compositor.util import df_type_to_str
 
+
 class td_style(tp.NamedTuple):
     text_align: tp.Any
     background_color: tp.Any

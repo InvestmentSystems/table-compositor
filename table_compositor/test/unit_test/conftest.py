@@ -313,7 +313,7 @@ def get_multi_hierarchical_df_with_layouts(
     return layout
 
 
-class FixtureFunc(tp.Protocol):
+class ScenarioFunc(tp.Protocol):
     def __call__(
         self,
         *,
@@ -325,9 +325,9 @@ class FixtureFunc(tp.Protocol):
         pass
 
 
-class Fixture(tp.NamedTuple):
+class Scenario(tp.NamedTuple):
     name: str
-    fixture_func: FixtureFunc
+    func: ScenarioFunc
     grid: bool
     nested: bool
     orientation: str
@@ -336,7 +336,7 @@ class Fixture(tp.NamedTuple):
     callback_func_cls: tp.Type[CallBackFuncInterface]
 
 
-def get_scenarios() -> tp.List[Fixture]:
+def get_scenarios() -> tp.List[Scenario]:
 
     fixture_funcs = (get_simple_df_with_layout, get_multi_hierarchical_df_with_layouts)
     permutations = product(
@@ -351,7 +351,7 @@ def get_scenarios() -> tp.List[Fixture]:
         ),
     )
 
-    fixtures = []
+    scenarios = []
     for (
         func,
         grid,
@@ -362,9 +362,9 @@ def get_scenarios() -> tp.List[Fixture]:
     ) in permutations:
         fixture_name = f"test_{func.__name__}_grid_{grid}_nested_{nested}_orientation_{orientation}_{frame_library}_{engine.__name__}"
 
-        fixture = Fixture(
+        fixture = Scenario(
             name=fixture_name,
-            fixture_func=func,
+            func=func,
             grid=grid,
             nested=nested,
             orientation=orientation,
@@ -372,6 +372,6 @@ def get_scenarios() -> tp.List[Fixture]:
             engine=engine,
             callback_func_cls=callback_func_cls,
         )
-        fixtures.append(fixture)
+        scenarios.append(fixture)
 
-    return fixtures
+    return scenarios

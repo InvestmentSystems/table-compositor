@@ -20,6 +20,7 @@ import numpy as np
 import pandas as pd
 import static_frame as sf
 
+
 class StyleWrapper(tp.NamedTuple):
     user_style: tp.Any
 
@@ -35,6 +36,7 @@ class Locs(tp.NamedTuple):
     data_loc: tp.Any
     index_name_loc: tp.Any
     nesting_level: tp.Any
+
 
 class PresentationElements(tp.NamedTuple):
     values: tp.Any
