@@ -1,12 +1,12 @@
 # coding: utf-8
 
-# Always prefer setuptools over distutils
 import typing as tp
 
 # To use a consistent encoding
 from codecs import open
 from os import path
 
+# Always prefer setuptools over distutils
 from setuptools import setup
 
 # https://packaging.python.org/distributing/
@@ -48,7 +48,7 @@ Packages: https://pypi.python.org/pypi/table-compositor
 
 setup(
     name="table-compositor",
-    version="1.1.5",
+    version="1.1.6",
     description="Library to render table-like data structure into XLSX and other formats.",
     long_description=get_long_description(),
     install_requires=list(get_install_requires()),

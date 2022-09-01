@@ -1,4 +1,4 @@
-pandas>=1.0.0,<1.1.0
+pandas>=0.24.2,<1.1.0
 numpy>=1.17.4,<=1.19.5
 openpyxl>=2.5.4
 xlsxwriter>=1.1.2
