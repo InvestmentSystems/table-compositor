@@ -1,5 +1,6 @@
 import unittest
 
+import warnings
 import pandas as pd
 
 import table_compositor.presentation_model as ptm
@@ -412,7 +413,9 @@ class TestUnit(unittest.TestCase):
     def test_presentation_model_resolve_loc_multi_hierarchical_nested(self):
         pm = self.multi_pm_outer
         pm2 = self.multi_pm_2
-        pm.data.values.loc[("a", 2), ("a", 1)] = pm2
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            pm.data.values.loc[("a", 2), ("a", 1)] = pm2
 
         locs = ptm.PresentationLayoutManager.resolve_loc(pm).locs
         self.assert_multi_column_resolve_loc_with_nested_pm(locs.header_loc)

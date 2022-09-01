@@ -68,9 +68,9 @@ class InternalIndex:
             self._index = index.to_pandas()
 
     @property
-    def labels(self):
+    def codes(self):
         if isinstance(self._index, pd.MultiIndex):
-            return self._index.labels
+            return self._index.codes
         raise NotImplementedError()
 
     @property
@@ -574,7 +574,7 @@ class IndexNode:
             return root
 
         # multi hierarchical index
-        values = list(zip(*index.labels))
+        values = list(zip(*index.codes))
         tree = IndexNode._build_tree(index, values, level=0)
         root.add_children(tree)
 

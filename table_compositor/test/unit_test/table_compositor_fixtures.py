@@ -1,6 +1,7 @@
 from collections import namedtuple
 from itertools import product
 
+import warnings
 import pandas as pd
 
 import table_compositor.table_compositor as tbc
@@ -280,7 +281,9 @@ def get_simple_df_with_layout(
     )
 
     if nested:
-        layout_model.data.values.loc[200, "b"] = layout_model_inner
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            layout_model.data.values.loc[200, "b"] = layout_model_inner
 
     if grid:
         return [[layout_model, layout_model_inner], layout_model]
@@ -343,7 +346,9 @@ def get_multi_hierarchical_df_with_layouts(
     )
 
     if nested:
-        layout_model.data.values.loc[("a", 2), ("a", 1)] = layout_model_inner
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            layout_model.data.values.loc[("a", 2), ("a", 1)] = layout_model_inner
 
     if grid:
         layout = [
