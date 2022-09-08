@@ -13,9 +13,6 @@ from setuptools import setup
 # to deploy:
 # rm -r dist
 # python setup.py sdist
-# python setup.py bdist_wheel
-# twine register dist/<wheel file>
-# twine register dist/<tar file>
 # twine upload dist/*
 
 ROOT_DIR_FP = path.abspath(path.dirname(__file__))
