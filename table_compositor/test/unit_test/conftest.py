@@ -8,11 +8,12 @@ import pandas as pd
 
 import table_compositor.table_compositor as tbc
 from table_compositor.presentation_model import PresentationModel
-from table_compositor.xlsx_styles import (OpenPyxlStyleHelper,
-                                          XlsxWriterStyleHelper)
-from table_compositor.xlsx_writer import (OpenPyxlCompositor,
-                                          XlsxWriterCompositor,
-                                          _XLSXCompositor)
+from table_compositor.xlsx_styles import OpenPyxlStyleHelper, XlsxWriterStyleHelper
+from table_compositor.xlsx_writer import (
+    OpenPyxlCompositor,
+    XlsxWriterCompositor,
+    _XLSXCompositor,
+)
 
 LayoutT = tp.Union[PresentationModel, tp.List[PresentationModel]]
 

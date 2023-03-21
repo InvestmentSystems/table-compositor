@@ -8,13 +8,15 @@ import itertools as it
 import pandas as pd
 
 from table_compositor.html_styles import HTMLWriterDefaults
-from table_compositor.presentation_model import (IndexNode, InternalFrame,
-                                                 PresentationElements,
-                                                 PresentationLayoutManager,
-                                                 PresentationModel,
-                                                 StyleWrapper)
-from table_compositor.xlsx_styles import (OpenPyxlStyleHelper,
-                                          XlsxWriterStyleHelper)
+from table_compositor.presentation_model import (
+    IndexNode,
+    InternalFrame,
+    PresentationElements,
+    PresentationLayoutManager,
+    PresentationModel,
+    StyleWrapper,
+)
+from table_compositor.xlsx_styles import OpenPyxlStyleHelper, XlsxWriterStyleHelper
 
 
 def build_presentation_model(

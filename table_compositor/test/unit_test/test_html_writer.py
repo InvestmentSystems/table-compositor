@@ -6,8 +6,7 @@ from pytest import mark
 
 import table_compositor.html_writer as htmlw
 from table_compositor.presentation_model import PresentationModel
-from table_compositor.test.unit_test.conftest import (LayoutT, Scenario,
-                                                      get_scenarios)
+from table_compositor.test.unit_test.conftest import LayoutT, Scenario, get_scenarios
 from table_compositor.util import df_type_to_str
 
 LayoutT = tp.List[tp.Union[PresentationModel, tp.List[PresentationModel]]]
