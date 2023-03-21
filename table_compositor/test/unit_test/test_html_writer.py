@@ -1,16 +1,12 @@
 import os
 import typing as tp
-from pytest import mark
 
 import numpy as np
+from pytest import mark
 
 import table_compositor.html_writer as htmlw
 from table_compositor.presentation_model import PresentationModel
-from table_compositor.test.unit_test.conftest import (
-    Scenario,
-    LayoutT,
-    get_scenarios,
-)
+from table_compositor.test.unit_test.conftest import LayoutT, Scenario, get_scenarios
 from table_compositor.util import df_type_to_str
 
 LayoutT = tp.List[tp.Union[PresentationModel, tp.List[PresentationModel]]]
@@ -22,7 +18,7 @@ class HtmlCallBackFunc:
 
     @staticmethod
     def _to_dollar_format(v):
-        if not isinstance(v, (np.float, np.int)):
+        if not isinstance(v, (float, int)):
             return v
         r = "${:0,.0f}".format(v)
         return r
@@ -31,7 +27,7 @@ class HtmlCallBackFunc:
         return df_type_to_str(self.df.loc[r, c])
 
     def data_style_func(self, r, c):
-        if isinstance(self.df.loc[r, c], (np.int_, np.float, np.uint)):
+        if isinstance(self.df.loc[r, c], (np.int_, float, np.uint)):
             return dict(text_align="right", padding="10px")
         return dict(text_align="left", padding="10px")
 

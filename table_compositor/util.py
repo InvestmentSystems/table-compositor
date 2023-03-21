@@ -12,7 +12,7 @@ def df_type_to_str(i):
         return bool(i)
     if isinstance(i, np.int_):
         return int(i)
-    if isinstance(i, np.float):
+    if isinstance(i, float):
         if np.isnan(i):
             return "NaN"
         elif np.isinf(i):

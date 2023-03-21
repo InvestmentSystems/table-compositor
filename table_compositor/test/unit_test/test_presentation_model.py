@@ -36,7 +36,8 @@ class TestUnit(unittest.TestCase):
                 b=[100, 200, 300, 100],
                 c=[True, False, True, False],
                 d=[10, 20, 40, 30],
-            )
+            ),
+            dtype=object,
         )
         cls.multi_df_1.columns = pd.MultiIndex.from_tuples(
             [("a", 1), ("a", 2), ("b", 1), ("b", 2)]
@@ -70,7 +71,6 @@ class TestUnit(unittest.TestCase):
         self.assertEqual(locs.children[2].data, (3, 0, 3, 0))
 
     def assert_simple_column_resolve_loc(self, locs):
-
         self.assertEqual(locs.children[0].value, "a")
         self.assertEqual(locs.children[0].key, ("a",))
         self.assertEqual(locs.children[0].data, (0, 1, 0, 1))
@@ -280,7 +280,6 @@ class TestUnit(unittest.TestCase):
         self.assertEqual(locs.children[1].children[1].data, (1, 10, 1, 10))  # +3 rows
 
     def assert_multi_column_resolve_loc_of_nested_pm(self, locs):
-
         # assumes nesting at  [('a', 2), ('a', 1)] of cls.multi_pm_1
         # ('a', )
         self.assertEqual(locs.children[0].key, ("a",))
@@ -441,7 +440,6 @@ class TestUnit(unittest.TestCase):
                 self.assertEqual(inner_loc.data_loc.loc[index_label, column], offset)
 
     def test_presentation_model_apply_with_None_as_callback(self):
-
         df = pd.DataFrame(data=dict(a=[1, 2, 3], b=[4, 5, 6]))
         df_actual = ptm.PresentationLayoutManager.apply(None, df)
 
@@ -449,7 +447,6 @@ class TestUnit(unittest.TestCase):
         self.assertListEqual(df["b"].values.tolist(), df_actual["b"].tolist())
 
     def test_presentation_model_apply_with_callback(self):
-
         df = pd.DataFrame(data=dict(a=[1, 2, 3], b=[4, 5, 6]))
         df_actual = ptm.PresentationLayoutManager.apply(
             lambda i, c: df.loc[i, c] * 10, df
@@ -459,7 +456,6 @@ class TestUnit(unittest.TestCase):
         self.assertListEqual((df["b"] * 10).values.tolist(), df_actual["b"].tolist())
 
     def test_presentation_model_apply_with_callback_at_column_level(self):
-
         df = pd.DataFrame(data=dict(a=[1, 2, 3], b=[4, 5, 6]))
         df_actual = ptm.PresentationLayoutManager.apply_at_column_level(
             lambda c: 10, df

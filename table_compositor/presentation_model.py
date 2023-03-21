@@ -10,20 +10,16 @@ and also create Excel files with all fancy formatting.
 # e. Revisit _convert method
 
 import typing as tp
-from collections import (
-    defaultdict,
-    deque,
-)
+from collections import defaultdict, deque
 from itertools import groupby
 
 import numpy as np
 import pandas as pd
 import static_frame as sf
-from openpyxl.styles.borders import Border
 from openpyxl.styles.alignment import Alignment
-from openpyxl.styles.fonts import Font
+from openpyxl.styles.borders import Border
 from openpyxl.styles.fills import PatternFill
-
+from openpyxl.styles.fonts import Font
 
 
 class IndexNode:
@@ -242,7 +238,6 @@ class IndexNode:
     # FIXME: offsets can be explicit start_row and start_col
     @staticmethod
     def resolve_loc_vertical(tree, offsets, row_hts):
-
         # make this immutable
 
         original_offsets = offsets
@@ -301,7 +296,16 @@ class LocOffsets(tp.NamedTuple):
 
 
 class StyleWrapper(tp.NamedTuple):
-    user_style: tp.Dict[str, tp.Union[str, Border, Alignment, Font, PatternFill,]]
+    user_style: tp.Dict[
+        str,
+        tp.Union[
+            str,
+            Border,
+            Alignment,
+            Font,
+            PatternFill,
+        ],
+    ]
 
 
 class Locs(tp.NamedTuple):
@@ -517,7 +521,6 @@ class PresentationLayoutManager:
 
     @staticmethod
     def apply_at_column_level(f, df):
-
         if not isinstance(df, InternalFrame):
             df = InternalFrame(df)
 
@@ -531,7 +534,9 @@ class PresentationLayoutManager:
         return new_df
 
     @staticmethod
-    def resolve_loc(presentation_model, offsets=(0, 0, 0, 0), nesting_level=0) -> PresentationAndLoc:
+    def resolve_loc(
+        presentation_model, offsets=(0, 0, 0, 0), nesting_level=0
+    ) -> PresentationAndLoc:
         """
         Return a DF View with cell populated with ((r,c),(r,c)) range.
         """

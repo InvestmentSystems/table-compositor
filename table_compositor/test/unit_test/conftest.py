@@ -3,14 +3,12 @@ import warnings
 from dbm.ndbm import library
 from itertools import product
 
+import numpy as np
 import pandas as pd
 
 import table_compositor.table_compositor as tbc
 from table_compositor.presentation_model import PresentationModel
-from table_compositor.xlsx_styles import (
-    OpenPyxlStyleHelper,
-    XlsxWriterStyleHelper,
-)
+from table_compositor.xlsx_styles import OpenPyxlStyleHelper, XlsxWriterStyleHelper
 from table_compositor.xlsx_writer import (
     OpenPyxlCompositor,
     XlsxWriterCompositor,
@@ -172,7 +170,6 @@ def get_simple_df_with_layout(
     callback_func_cls: tp.Type[CallBackFuncInterface] = XlsxCallBackFunc,
     frame_library: str = "pandas",
 ) -> tp.List[PresentationModel]:
-
     data = dict(a=[0.1, 0.2, 0.3], b=[100, 200, -300], c=[True, False, True])
     df = pd.DataFrame(data=data, index=[100, 200, 300])
     df.index.name = "Sample_Index"
@@ -243,7 +240,6 @@ def get_multi_hierarchical_df_with_layouts(
     callback_func_cls: tp.Type[CallBackFuncInterface] = XlsxCallBackFunc,
     frame_library: str = "pandas",
 ) -> PresentationModel:
-
     df = pd.DataFrame(
         data=dict(
             a=[0.1, 0.2, 0.3, 0.4],
@@ -337,7 +333,6 @@ class Scenario(tp.NamedTuple):
 
 
 def get_scenarios() -> tp.List[Scenario]:
-
     fixture_funcs = (get_simple_df_with_layout, get_multi_hierarchical_df_with_layouts)
     permutations = product(
         fixture_funcs,  # fixture function to get layout
