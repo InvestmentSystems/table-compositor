@@ -8,18 +8,13 @@ import itertools as it
 import pandas as pd
 
 from table_compositor.html_styles import HTMLWriterDefaults
-from table_compositor.presentation_model import (
-    IndexNode,
-    InternalFrame,
-    PresentationElements,
-    PresentationLayoutManager,
-    PresentationModel,
-    StyleWrapper,
-)
-from table_compositor.xlsx_styles import (
-    OpenPyxlStyleHelper,
-    XlsxWriterStyleHelper,
-)
+from table_compositor.presentation_model import (IndexNode, InternalFrame,
+                                                 PresentationElements,
+                                                 PresentationLayoutManager,
+                                                 PresentationModel,
+                                                 StyleWrapper)
+from table_compositor.xlsx_styles import (OpenPyxlStyleHelper,
+                                          XlsxWriterStyleHelper)
 
 
 def build_presentation_model(
@@ -38,7 +33,6 @@ def build_presentation_model(
     engine="openpyxl",
     **kwargs,
 ):
-
     """Construct and return the presentation model that will be used while rendering to html/xlsx formats. The returned object has all the information required to render the tables in the requested format. The details of the object is transparent to the caller. It is only exposed for certain advanced operations.
 
     Args:
@@ -132,7 +126,6 @@ def _build_presentation_model_for_excel(
     engine="openpyxl",  # for backward compatibility
     **kwargs,
 ):
-
     if engine == "xlsxwriter":
         helper_cls = XlsxWriterStyleHelper
     else:
@@ -180,7 +173,6 @@ def _build_presentation_model_for_html(
     column_style_func=None,
     **kwargs,
 ):
-
     header_style_func = header_style_func or HTMLWriterDefaults.header_style_func(df)
     header_value_func = header_value_func or HTMLWriterDefaults.header_value_func(df)
     index_style_func = index_style_func or HTMLWriterDefaults.index_style_func(df)
@@ -206,7 +198,6 @@ def _build_presentation_model_for_html(
 
 
 def _raise_on_invalid_index(index, label: str):
-
     # the index and columns of the provided dataframe should be unique. if the index/columns of the dataframe are multi-hierarchical  then at each level the values should be present contigously
     # For example in :
     # df.columns =  df.columns = pd.MultiIndex.from_tuples([('a', 1), ('a', 2), ('b', 1), ('a', 3)])
