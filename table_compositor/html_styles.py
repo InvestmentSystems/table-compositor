@@ -64,7 +64,7 @@ class HTMLWriterDefaults:
 
     @staticmethod
     def _to_dollar_format(v):
-        if not isinstance(v, (np.float, np.int)):
+        if not isinstance(v, (float, int)):
             return v
         r = "${:0,.0f}".format(v)
         return r
@@ -105,7 +105,7 @@ class HTMLWriterDefaults:
         """
 
         def _style_func(r, c):
-            if isinstance(df.loc[r, c], (np.int_, np.float, np.uint)):
+            if isinstance(df.loc[r, c], (np.int_, float, np.uint)):
                 return td_style_to_str(default_numeric_td_style)
             return td_style_to_str(default_td_style)
 

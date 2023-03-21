@@ -25,7 +25,6 @@ from openpyxl.styles.fonts import Font
 from openpyxl.styles.fills import PatternFill
 
 
-
 class IndexNode:
     def __init__(self, *, value=None, parent=None, data=None, old_data=None, key=None):
         self.value = value
@@ -301,7 +300,16 @@ class LocOffsets(tp.NamedTuple):
 
 
 class StyleWrapper(tp.NamedTuple):
-    user_style: tp.Dict[str, tp.Union[str, Border, Alignment, Font, PatternFill,]]
+    user_style: tp.Dict[
+        str,
+        tp.Union[
+            str,
+            Border,
+            Alignment,
+            Font,
+            PatternFill,
+        ],
+    ]
 
 
 class Locs(tp.NamedTuple):
@@ -531,7 +539,9 @@ class PresentationLayoutManager:
         return new_df
 
     @staticmethod
-    def resolve_loc(presentation_model, offsets=(0, 0, 0, 0), nesting_level=0) -> PresentationAndLoc:
+    def resolve_loc(
+        presentation_model, offsets=(0, 0, 0, 0), nesting_level=0
+    ) -> PresentationAndLoc:
         """
         Return a DF View with cell populated with ((r,c),(r,c)) range.
         """
