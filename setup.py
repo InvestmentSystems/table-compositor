@@ -45,7 +45,7 @@ Packages: https://pypi.python.org/pypi/table-compositor
 
 setup(
     name="table-compositor",
-    version="1.1.7",
+    version="1.2.0",
     description="Library to render table-like data structure into XLSX and other formats.",
     long_description=get_long_description(),
     install_requires=list(get_install_requires()),
